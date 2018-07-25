@@ -13,20 +13,20 @@
 % contents of the Output folder which collects all of the simulation data
 % and statistical data.
 
-clc;
-clear;
-close all;
-rng('shuffle');
-
-% set your working directory
-workingdir = 'C:\Users\kieran\develop\matlab\Chewing Muscle Pertubations';
-
-% Set to your working directory in matlab
-cd(workingdir);
+%----------------------------SETUP ARTISYNTH-------------------------------
+workingdir = 'C:\Users\kieran\develop\matlab\chewing-pertubation';
+artisynthhome = 'C:\Users\kieran\develop\artisynth';
+initArtisynth(workingdir,artisynthhome);
 
 %-------------------------------INCLUDES-----------------------------------
 addpath(strcat(workingdir,'\Plot Functions'));
 addpath(strcat(workingdir,'\Helper Functions'));
+
+%----------- --------CLEAR WORKSPACE AND SHUFFLE RNDGEN--------------------
+clc;
+clear;
+close all;
+rng('shuffle');
 
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables
@@ -37,7 +37,7 @@ fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % start at 2 because excitation matrix from artisynth's first column is the
 % time step
 muscles = [2:25]; 
-numSim = 160000;
+numSim = 10;
 t0PertWindow = 0; %s
 tfPertWindow = 0.05; %s
 pertModelType = ["additive", "multiplicative"];
