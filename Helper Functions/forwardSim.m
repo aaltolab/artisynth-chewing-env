@@ -40,9 +40,9 @@ lip     =  'Left Inferior Lateral Pterygoid';
 lsp     =  'Left Superior Lateral Pterygoid';
 lam     =  'Left Anterior Mylohyoid';
 lgh     =  'Left Geniohyoid';
-lpd     =  'Left Posterior Digastric';
-lsh     =  'Left Stylohyoid';
-lsth    =  'Left Sternohyoid' ;
+% lpd     =  'Left Posterior Digastric';
+% lsh     =  'Left Stylohyoid';
+% lsth    =  'Left Sternohyoid' ;
 lat     =  'Left Anterior Temporal';
 lmt     =  'Left Middle Temporal';
 lpm     =  'Left Posterior Mylohyoid';
@@ -55,9 +55,9 @@ rip     =  'Right Inferior Lateral Pterygoid';
 rsp     =  'Right Superior Lateral Pterygoid';
 ram     =  'Right Anterior Mylohyoid';
 rgh     =  'Right Geniohyoid';
-rpd     =  'Right Posterior Digastric';
-rsh     =  'Right Stylohyoid';
-rsteh   =  'Right Sternohyoid';
+% rpd     =  'Right Posterior Digastric';
+% rsh     =  'Right Stylohyoid';
+% rsteh   =  'Right Sternohyoid';
 rat     =  'Right Anterior Temporal';
 rmt     =  'Right Middle Temporal';
 rpm     =  'Right Posterior Mylohyoid';
@@ -227,7 +227,10 @@ icv(:,2:4) = icv(:,2:4).*0.001; % Convert mm/s to m/s
 %Calculate average acceleration within pertubation window
 averageica = (icv(end,2:4)-icv(1,2:4))/(icv(end,1)-icv(1,1));
 excitations = ah.getOprobeData('excitations');
-save('Output\excitations.mat','excitations');
+outputfilename = strcat('Output Data_', datestr(now,'mmmm_dd_yyyy_HH_MM'));
+mkdir(outputfilename);
+mkdir(strcat(outputfilename,'/PreSimPlots'));
+save(strcat(outputfilename, '\excitations.mat'),'excitations');
 
 ah.quit();
 
@@ -247,7 +250,7 @@ figure(1);
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
  xlim([-0.5 0.5]); 
- saveas(gcf,'Output/FrontalView.png')
+ saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/FrontalView.png'));
  
  % Transverse view on ICP
 figure(2);
@@ -261,11 +264,11 @@ figure(2);
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Tansverse View)');
  xlim([-0.5 0.5]);
- saveas(gcf,'Output/TransverseView.png')
+ saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
 
 % Muscle excitation example
-plotExcitations(smoothExcitations,perturbedExcitations, 1, [16,17,23]);
-saveas(gcf,'Output/ExcitationExample.png')
+plotExcitations(smoothExcitations,perturbedExcitations, 1, muscles(:,[16 17 23]));
+saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 spreadfigures();
 
 %Estimate completion time and report to dialog
@@ -391,7 +394,7 @@ for i = 1:numSim
 	PertWindowICAX     			= pertaverageica(1);
 	PertWindowICAY     			= pertaverageica(2);
 	PertWindowICAZ     			= pertaverageica(3);
-	PertExcitationFilePath     	= strcat(pwd,'\Output\pertExcitationMagitudes.mat');
+	PertExcitationFilePath     	= strcat(pwd, outputfilename,'\pertExcitationMagitudes.mat');
 	WindowICPX     				= max(icp(window(:,1),2));
 	WindowICPY     				= max(icp(window(:,1),3));
 	WindowICPZ     				= max(icp(window(:,1),4));
@@ -401,7 +404,7 @@ for i = 1:numSim
 	WindowICAX     				= averageica(1);
 	WindowICAY     				= averageica(2);
 	WindowICAZ     				= averageica(3);
-	ExcitationFilePath     		= strcat(pwd,'\Output\excitations.mat');
+	ExcitationFilePath     		= strcat(pwd,outputfilename,'\excitations.mat');
 	ladPertExcit				= pertExcitMuscleMags(1);	   
 	lipPertExcit				= pertExcitMuscleMags(2);	   
 	lspPertExcit				= pertExcitMuscleMags(3);	   
@@ -547,7 +550,13 @@ end
     
     s = sprintf('Total simulation time = %.2f', tElapsed);
     fprintf(strcat(s,unit));
-	save('Output\pertExcitationMagitudes.mat','pertExcitationMagitudes');
+	
+    %Save data to file
+    writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',')  
+    writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',')  
+    save(strcat(outputfilename,'\pertExcitationMagitudes.mat'),'pertExcitationMagitudes');
+    
+    % Return key data tables
     simulationParamTableOut = simulationParamTable;
 	statvarTableOut = statvarTable;
 end

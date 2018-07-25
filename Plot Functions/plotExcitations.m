@@ -6,9 +6,11 @@ ymin = -0.01;
 ymax = 0.12;
 rng('shuffle')
 
+musclesids = muscles(1,:);
+
 t = excitM(:,1,1);
-excit = excitM(:,muscles,:);
-pertExcit = randPertExcit(:,muscles,:);
+excit = excitM(:,musclesids,:);
+pertExcit = randPertExcit(:,musclesids,:);
 
 for i = 1:numSim
     figure(3);
@@ -23,7 +25,7 @@ for i = 1:numSim
             ylim([ymin ymax]); 
             xlabel('Time [s]');
             ylabel('Excitation [%]');
-            rightlabel = sprintf('Muscle %d',muscles(j));
+            rightlabel = sprintf('%d',muscles(2,j));
             yyaxis right
             ylabel(rightlabel)
             legend('Pertubation','No Pertubation');
