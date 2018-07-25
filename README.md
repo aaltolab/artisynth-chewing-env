@@ -2,7 +2,7 @@
 
 Pre-requisites:
 1. Clone Artisynth (https://github.com/artisynth/artisynth_core.git) and its dependencies.
-2. Follow the install guide for OSX and Windows to setup your enviroment (https://www.artisynth.org/Main/HomePage).
+2. Follow the install guide for OSX and Windows to setup your enviroment (https://www.artisynth.org/Documentation/InstallGuide).
 3. Artisynth must also be configured to work in MATLAB. Currently, Artisynth is recommended to be compiled with Java 8 therefore to run Artinsyht in MATLAB you must install MATLAB R2017b. Instructions for setup can be found here: https://www.artisynth.org/Documentation/MatlabAndJython
 
 Script Overview:
