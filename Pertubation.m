@@ -28,12 +28,12 @@ muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables
 simTime = 0.5; %s
-simTimeStep =  0.0001; %s
-fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emghe
+simTimeStep =  0.005; %s
+fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 150000;
-t0PertWindow = 0.25; %s
-tfPertWindow = 0.3; %s
+numSim = 10;
+t0PertWindow = 0.0; %s
+tfPertWindow = 0.06; %s
 pertModelType = ["additive", "multiplicative"];
 pertShapeType = ["unitstep", "ramp"];
 
@@ -70,9 +70,8 @@ smoothExcitations = zeros(size(invExcitations));
 smoothExcitations(:,1) = invExcitations(:,1);
 
 for i = 2:size(invExcitations,2)
-     smoothExcitations(:,i) = sgolayfilt(invExcitations(:,i), 5, 711);
+     smoothExcitations(:,i) = smoothdata(invExcitations(:,i));
 end
-
 %------------------------------PERTUBATION---------------------------------
 % Create local pertubation window and shape function
 openWindow = createLocalPertWindow(invExcitations,t0PertWindow,tfPertWindow, fs);

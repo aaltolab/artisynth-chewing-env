@@ -2,6 +2,8 @@ function [] = plotExcitations(excitM,randPertExcit,muscles,groupName,outputfilen
 %PLOTEXCITATIONS Summary of this function goes here
 %   Detailed explanation goes here
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
+ymin = -0.01;
+ymax = 0.1;
 
 t = excitM(:,1);
 excitationsTemp = excitM(:,2:25);
@@ -24,6 +26,7 @@ if(randPertExcit == 0)
         drawnow;
         set(get(handle(figH(iFig)), 'javaframe'), 'GroupName', groupName);
         plot(t,excit(:,iFig),'b','LineWidth',1.2);
+        ylim([ymin ymax]); 
         xlabel('Time [s]');
         ylabel('Excitation [%]');
         title(musclelabels(iFig));
@@ -32,8 +35,6 @@ if(randPertExcit == 0)
     end
     warning(bakWarn);
 else
-    ymin = -0.01;
-    ymax = 0.2;
     pertExcit = randPertExcit(:,muscleids);
     figure;
     title('Pertubation Excitation Example');    
