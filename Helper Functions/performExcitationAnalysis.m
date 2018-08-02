@@ -4,12 +4,11 @@ function [perturbedExcitMsOut,pertShapeMagnitutdes] = performExcitationAnalysis(
 
 % Set all negative values in smoothed matricies to 0
 excitMs(excitMs<0)=0;
-additive = 0;
-muscleids = cell2mat(muscles(1,:));
+muscleids =  cell2mat(muscles(1,:));
 
 if (strcmp(pertModelType,"additive"))
     additive = 1;
-    sigma = .03*max(max(max(excitMs)));
+    sigma = .01*max(max(max(excitMs)));
     mu= 0;
 elseif (strcmp(pertModelType,"multiplicative"))
     additive = 0;
@@ -17,8 +16,8 @@ elseif (strcmp(pertModelType,"multiplicative"))
     mu= 0;
 end
     
-perturbedExcitMs=excitMs; 
-pertShapeMagnitutdes = zeros(1,24);
+perturbedExcitMs=excitMs(:,muscleids); 
+pertShapeMagnitutdes = zeros(1,length(muscleids));
 
   
 for n = 1:size(perturbedExcitMs,3)

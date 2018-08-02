@@ -1,7 +1,7 @@
 function [simulationParamTableOut, statvarTableOut] = ...
-    forwardSim(smoothExcitations,window,pertshape,...
+    forwardSim(smoothExcitationM,window,pertshape,...
 			   muscles,pertModelType,forwardModelName,...
-			   invModelName,pertShapeType,invICP,numSim);
+			   invModelName,pertShapeType,invICP,numSim,outputfilename);
 %forwardSim 
 % SUMMARY: 
 % This function accepts all of the required paramters 
@@ -19,7 +19,8 @@ function [simulationParamTableOut, statvarTableOut] = ...
 %						time information. See createLocalPertWindow.
 %	pertshape		  = 2D column matrix with rand pertubation 
 %						magnitutdes. See createPertShape.
-%	muscles			  = A 1D row vecotor with all muscles to perform
+%	musclesMap		  = A Key, Value pair of simulation muscles. The keys 
+%                       are the muscle codes and the values are integers 
 %					    pertubations to.
 %   pertModelType     = The type of pertubation model
 %					    (additive or multplicative).
@@ -34,7 +35,7 @@ function [simulationParamTableOut, statvarTableOut] = ...
 % simulationParamTableOut = with all of the required parameters to run 
 %							the specific simulation.
 
-%-------------------------MUSCLE DEFINITIONS------------------------------
+%----------------------FULL MUSCLE NAMES FOR IPROBES-----------------------
 lad     =  'Left Anterior Digastric';
 lip     =  'Left Inferior Lateral Pterygoid';
 lsp     =  'Left Superior Lateral Pterygoid';
@@ -66,7 +67,8 @@ rdm     =  'Right Deep Masseter';
 rsm     =  'Right Superficial Masseter';
 rmp     =  'Right Medial Pterygoid';					
 
-t = smoothExcitations(:,1,1);
+smoothExcitations = smoothExcitationM(:,2:25);
+t = smoothExcitationM(:,1,1);
 simTime = max(t);
 
 % Setting to 1 will write to artisynth probe files. Must change path to location 
@@ -75,48 +77,48 @@ writetoartisynth = 0;
 %-------------------------OUTPUT DATA HEADERS------------------------------
 statvarTableCol = {
 				'Simulation' 				   			 			 							   						
-				'PertWindowICPXmm'     			
-				'PertWindowICPYmm'     			
-				'PertWindowICPZmm'     			
-				'PertWindowICVXm_s'     			
-				'PertWindowICVYm_s'     			
-				'PertWindowICVZm_s'     		
-				'PertAvgWindowICAXm_s2'     			
-				'PertAvgWindowICAYm_s2'     			
-				'PertAvgWindowICAZm_s2'
-				'WindowICPXmm'     				
-				'WindowICPYmm'     				
-				'WindowICPZmm'     				
-				'WindowICVXm_s'   				
-				'WindowICVYm_s'   				
-				'WinMaxICVZm_s'   				
-				'WindowAvgICAXm_s2' 				
-				'WindowAvgICAYm_s2' 				
-				'WindowAvgICAZm_s2'
-				'ladPertExcit' 
-				'lipPertExcit' 
-				'lspPertExcit' 
-				'lamPertExcit' 
-				'lghPertExcit' 
-				'latPertExcit' 
-				'lmtPertExcit' 
-				'lpmPertExcit' 
-				'lptPertExcit' 
-				'ldmPertExcit' 
-				'lsmPertExcit' 
-				'lmpPertExcit' 
-				'radPertExcit' 
-				'ripPertExcit' 
-				'rspPertExcit' 
-				'ramPertExcit' 
-				'rghPertExcit' 
-				'ratPertExcit' 
-				'rmtPertExcit' 
-				'rpmPertExcit' 
-				'rptPertExcit' 
-				'rdmPertExcit' 
-				'rsmPertExcit' 
-				'rmpPertExcit' 
+				'PertICPX'     			
+				'PertICPY'     			
+				'PertICPZ'     			
+				'PertICVX'     			
+				'PertICVY'     			
+				'PertICVZ'     		
+				'PertAvgICAX'     			
+				'PertAvgICAY'     			
+				'PertAvgICAZ'
+				'ICPX'     				
+				'ICPY'     				
+				'ICPZ'     				
+				'ICVX'   				
+				'ICVY'   				
+				'ICVZ'   				
+				'AvgICAX' 				
+				'AvgICAY' 				
+				'AvgICAZ'
+				'lad' 
+				'lip' 
+				'lsp' 
+				'lam' 
+				'lgh' 
+				'lat' 
+				'lmt' 
+				'lpm' 
+				'lpt' 
+				'ldm' 
+				'lsm' 
+				'lmp' 
+				'rad' 
+				'rip' 
+				'rsp' 
+				'ram' 
+				'rgh' 
+				'rat' 
+				'rmt' 
+				'rpm' 
+				'rpt' 
+				'rdm' 
+				'rsm' 
+				'rmp' 
 			 }';
 			 
 simulationParamTableCol = {
@@ -153,32 +155,34 @@ simulationParamTable = cell2table(cell(0,length(simulationParamTableCol)), 'Vari
 % Run forward simulation with smooth excitations and check that incisor 
 % path error is less than 1mm in x,y, and z.
 
+
+
 ah = artisynth('-noGui','-model',forwardModelName);
 
-ah.setIprobeData (lat  ,horzcat(t,smoothExcitations(:,2)));
-ah.setIprobeData (rat  ,horzcat(t,smoothExcitations(:,3)));
-ah.setIprobeData (lmt  ,horzcat(t,smoothExcitations(:,4)));
-ah.setIprobeData (rmt  ,horzcat(t,smoothExcitations(:,5)));
-ah.setIprobeData (lpt  ,horzcat(t,smoothExcitations(:,6)));
-ah.setIprobeData (rpt  ,horzcat(t,smoothExcitations(:,7)));
-ah.setIprobeData (lsm  ,horzcat(t,smoothExcitations(:,8)));
-ah.setIprobeData (rsm  ,horzcat(t,smoothExcitations(:,9)));
-ah.setIprobeData (ldm  ,horzcat(t,smoothExcitations(:,10)));
-ah.setIprobeData (rdm  ,horzcat(t,smoothExcitations(:,11)));
-ah.setIprobeData (lmp  ,horzcat(t,smoothExcitations(:,12)));
-ah.setIprobeData (rmp  ,horzcat(t,smoothExcitations(:,13)));
-ah.setIprobeData (lsp  ,horzcat(t,smoothExcitations(:,14)));
-ah.setIprobeData (rsp  ,horzcat(t,smoothExcitations(:,15)));
-ah.setIprobeData (lip  ,horzcat(t,smoothExcitations(:,16)));
-ah.setIprobeData (rip  ,horzcat(t,smoothExcitations(:,17)));
-ah.setIprobeData (lad  ,horzcat(t,smoothExcitations(:,18)));
-ah.setIprobeData (rad  ,horzcat(t,smoothExcitations(:,19)));
-ah.setIprobeData (lam  ,horzcat(t,smoothExcitations(:,20)));
-ah.setIprobeData (ram  ,horzcat(t,smoothExcitations(:,21)));
-ah.setIprobeData (lpm  ,horzcat(t,smoothExcitations(:,22)));
-ah.setIprobeData (rpm  ,horzcat(t,smoothExcitations(:,23)));
-ah.setIprobeData (lgh  ,horzcat(t,smoothExcitations(:,24)));
-ah.setIprobeData (rgh  ,horzcat(t,smoothExcitations(:,25))); 
+ah.setIprobeData (lat  ,horzcat(t,smoothExcitations(:,1)));
+ah.setIprobeData (rat  ,horzcat(t,smoothExcitations(:,2)));
+ah.setIprobeData (lmt  ,horzcat(t,smoothExcitations(:,3)));
+ah.setIprobeData (rmt  ,horzcat(t,smoothExcitations(:,4)));
+ah.setIprobeData (lpt  ,horzcat(t,smoothExcitations(:,5)));
+ah.setIprobeData (rpt  ,horzcat(t,smoothExcitations(:,6)));
+ah.setIprobeData (lsm  ,horzcat(t,smoothExcitations(:,7)));
+ah.setIprobeData (rsm  ,horzcat(t,smoothExcitations(:,8)));
+ah.setIprobeData (ldm  ,horzcat(t,smoothExcitations(:,9)));
+ah.setIprobeData (rdm  ,horzcat(t,smoothExcitations(:,10)));
+ah.setIprobeData (lmp  ,horzcat(t,smoothExcitations(:,11)));
+ah.setIprobeData (rmp  ,horzcat(t,smoothExcitations(:,12)));
+ah.setIprobeData (lsp  ,horzcat(t,smoothExcitations(:,13)));
+ah.setIprobeData (rsp  ,horzcat(t,smoothExcitations(:,14)));
+ah.setIprobeData (lip  ,horzcat(t,smoothExcitations(:,15)));
+ah.setIprobeData (rip  ,horzcat(t,smoothExcitations(:,16)));
+ah.setIprobeData (lad  ,horzcat(t,smoothExcitations(:,17)));
+ah.setIprobeData (rad  ,horzcat(t,smoothExcitations(:,18)));
+ah.setIprobeData (lam  ,horzcat(t,smoothExcitations(:,19)));
+ah.setIprobeData (ram  ,horzcat(t,smoothExcitations(:,20)));
+ah.setIprobeData (lpm  ,horzcat(t,smoothExcitations(:,21)));
+ah.setIprobeData (rpm  ,horzcat(t,smoothExcitations(:,22)));
+ah.setIprobeData (lgh  ,horzcat(t,smoothExcitations(:,23)));
+ah.setIprobeData (rgh  ,horzcat(t,smoothExcitations(:,24))); 
 
 ah.play(simTime);
 printed = 0;  % 1 = true and 0 = false
@@ -217,7 +221,6 @@ MaxPositionError = max(abs(invICP(:,2:4)-icpFull(:,2:4)));
 % No Pertubations
 icvFull = ah.getOprobeData('incisor_velocity');
 icaFull = 0;
-excitationsFull = ah.getOprobeData('excitations');
 
 %Select position and velocity only within specified pertubation window
 icp = icpFull(window(:,1),:);
@@ -226,38 +229,48 @@ icv(:,2:4) = icv(:,2:4).*0.001; % Convert mm/s to m/s
 
 %Calculate average acceleration within pertubation window
 averageica = (icv(end,2:4)-icv(1,2:4))/(icv(end,1)-icv(1,1));
-excitations = ah.getOprobeData('excitations');
-outputfilename = strcat('Output Data_', datestr(now,'mmmm_dd_yyyy_HH_MM'));
-mkdir(outputfilename);
-mkdir(strcat(outputfilename,'/PreSimPlots'));
-save(strcat(outputfilename, '\excitations.mat'),'excitations');
-
+excitationsFull = ah.getOprobeData('excitations');
+save(strcat(outputfilename, '\excitations.mat'),'excitationsFull');
+% mkdir(strcat(outputfilename,'\PreSimPlots\'));
 ah.quit();
+
+% Get Smooth excitation forward plots
+% %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
+plotExcitations(smoothExcitationM,0, muscles(:, [4 16 5 17 1 13]),'ForwHyoids-Digastrics',outputfilename);
+
+% Pterygoids [3 14 3 15 12 24]
+plotExcitations(smoothExcitationM,0, muscles(:, [2 14 3 15 12 24]),'ForwPterygoids',outputfilename);
+
+% Temperols [6 18 7 19 9 21]
+plotExcitations(smoothExcitationM,0, muscles(:, [6 18 7 19 9 21]),'ForwTemperols',outputfilename);
+
+% Masseters [10 22 11 23]
+plotExcitations(smoothExcitationM,0, muscles(:, [10 22 11 23]),'ForwMasseters',outputfilename);
 
 % Perform excitation analysis in window for pre simulation plots
 perturbedExcitations = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
 
 % Generate pre simulation plots
 % Frontal view on ICP
-figure(1);
- plot3(invICP(:,2),invICP(:,3),invICP(:,4));
+figure;
+ plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
  view(0,0);
  hold on
- plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4));
+ plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(0,0);
  legend('inverse ICP', 'forwardICP');
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
  xlim([-0.5 0.5]); 
- saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/FrontalView.png'));
+ saveas(gcf,strcat(outputfilename, '\PreSimPlots', '\FrontalView.png'));
  
  % Transverse view on ICP
-figure(2);
- plot3(invICP(:,2),invICP(:,3),invICP(:,4));
+figure;
+ plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
  view(90,0)  % YZ
  hold on
- plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4));
+ plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(90,0)  % YZ
  legend('inverse ICP', 'forwardICP');
  ylabel('Y axis [mm]');
@@ -267,13 +280,12 @@ figure(2);
  saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
 
 % Muscle excitation example
-plotExcitations(smoothExcitations,perturbedExcitations, 1, muscles(:,[16 17 23]));
+plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [16 17]),0);
 saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
-spreadfigures();
 
 %Estimate completion time and report to dialog
 pertExcitationMagitudes = zeros(numSim,24);
-completionTime = 0.35 * numSim;
+completionTime = 0.25 * numSim;
 
 if(completionTime <= 60)
     unit = '[sec].';
@@ -291,18 +303,18 @@ end
 
 % Generate dialog to ask user if they want to procceed with know path deviation error
 question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
-    MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
-answer = questdlg(question, ...
-	'Warning',...
-    	'Yes','No','No');
+	MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
+options.WindowStyle = 'normal';
+answer = questdlg(question,'Warning','Yes','No','No');
 % Handle response
 switch answer
     case 'Yes'
-        completetime = (0.35 * numSim);
+        completetime = (0.25 * numSim);
         fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f [s]\n'...
             ,completetime);
     case 'No'
-        simulationDataTableOut = 0;
+        simulationParamTableOut = 0;
+        statvarTableOut = 0;
         disp('Pertubation analysis aborted');
         return;
 end
@@ -311,12 +323,17 @@ end
 ah = artisynth('-noGui','-model',forwardModelName);
 
 % Fast forward to beginneing of pertubation window
-ah.forward();
 tElapsed = 0;
 ah.clearWayPoints();
 ah.addBreakPoint(min(window(:,2)));
 ah.addBreakPoint(max(window(:,2)));
 
+if(min(window(:,2)) > 0)
+    ah.play();
+    ah.waitForStop();
+end
+% 
+% display(ah.getTime());
 % Loop small pertubation for x simulations
 % start total time clock
 tStart = tic;
@@ -338,38 +355,45 @@ for i = 1:numSim
     
     pertExcitationMagitudes(i,:) = pertExcitMuscleMags;
     
-    ah.setIprobeData (lat  ,horzcat(t,perturbedExcitations(:,2)));
-	ah.setIprobeData (rat  ,horzcat(t,perturbedExcitations(:,3)));
-	ah.setIprobeData (lmt  ,horzcat(t,perturbedExcitations(:,4)));
-	ah.setIprobeData (rmt  ,horzcat(t,perturbedExcitations(:,5)));
-	ah.setIprobeData (lpt  ,horzcat(t,perturbedExcitations(:,6)));
-	ah.setIprobeData (rpt  ,horzcat(t,perturbedExcitations(:,7)));
-	ah.setIprobeData (lsm  ,horzcat(t,perturbedExcitations(:,8)));
-	ah.setIprobeData (rsm  ,horzcat(t,perturbedExcitations(:,9)));
-	ah.setIprobeData (ldm  ,horzcat(t,perturbedExcitations(:,10)));
-	ah.setIprobeData (rdm  ,horzcat(t,perturbedExcitations(:,11)));
-	ah.setIprobeData (lmp  ,horzcat(t,perturbedExcitations(:,12)));
-	ah.setIprobeData (rmp  ,horzcat(t,perturbedExcitations(:,13)));
-	ah.setIprobeData (lsp  ,horzcat(t,perturbedExcitations(:,14)));
-	ah.setIprobeData (rsp  ,horzcat(t,perturbedExcitations(:,15)));
-	ah.setIprobeData (lip  ,horzcat(t,perturbedExcitations(:,16)));
-	ah.setIprobeData (rip  ,horzcat(t,perturbedExcitations(:,17)));
-	ah.setIprobeData (lad  ,horzcat(t,perturbedExcitations(:,18)));
-	ah.setIprobeData (rad  ,horzcat(t,perturbedExcitations(:,19)));
-	ah.setIprobeData (lam  ,horzcat(t,perturbedExcitations(:,20)));
-	ah.setIprobeData (ram  ,horzcat(t,perturbedExcitations(:,21)));
-	ah.setIprobeData (lpm  ,horzcat(t,perturbedExcitations(:,22)));
-	ah.setIprobeData (rpm  ,horzcat(t,perturbedExcitations(:,23)));
-	ah.setIprobeData (lgh  ,horzcat(t,perturbedExcitations(:,24)));
-	ah.setIprobeData (rgh  ,horzcat(t,perturbedExcitations(:,25)));
+    ah.setIprobeData (lat  ,horzcat(t,perturbedExcitations(:,1)));
+	ah.setIprobeData (rat  ,horzcat(t,perturbedExcitations(:,2)));
+	ah.setIprobeData (lmt  ,horzcat(t,perturbedExcitations(:,3)));
+	ah.setIprobeData (rmt  ,horzcat(t,perturbedExcitations(:,4)));
+	ah.setIprobeData (lpt  ,horzcat(t,perturbedExcitations(:,5)));
+	ah.setIprobeData (rpt  ,horzcat(t,perturbedExcitations(:,6)));
+	ah.setIprobeData (lsm  ,horzcat(t,perturbedExcitations(:,7)));
+	ah.setIprobeData (rsm  ,horzcat(t,perturbedExcitations(:,8)));
+	ah.setIprobeData (ldm  ,horzcat(t,perturbedExcitations(:,9)));
+	ah.setIprobeData (rdm  ,horzcat(t,perturbedExcitations(:,10)));
+	ah.setIprobeData (lmp  ,horzcat(t,perturbedExcitations(:,11)));
+	ah.setIprobeData (rmp  ,horzcat(t,perturbedExcitations(:,12)));
+	ah.setIprobeData (lsp  ,horzcat(t,perturbedExcitations(:,13)));
+	ah.setIprobeData (rsp  ,horzcat(t,perturbedExcitations(:,14)));
+	ah.setIprobeData (lip  ,horzcat(t,perturbedExcitations(:,15)));
+	ah.setIprobeData (rip  ,horzcat(t,perturbedExcitations(:,16)));
+	ah.setIprobeData (lad  ,horzcat(t,perturbedExcitations(:,17)));
+	ah.setIprobeData (rad  ,horzcat(t,perturbedExcitations(:,18)));
+	ah.setIprobeData (lam  ,horzcat(t,perturbedExcitations(:,19)));
+	ah.setIprobeData (ram  ,horzcat(t,perturbedExcitations(:,20)));
+	ah.setIprobeData (lpm  ,horzcat(t,perturbedExcitations(:,21)));
+	ah.setIprobeData (rpm  ,horzcat(t,perturbedExcitations(:,22)));
+	ah.setIprobeData (lgh  ,horzcat(t,perturbedExcitations(:,23)));
+	ah.setIprobeData (rgh  ,horzcat(t,perturbedExcitations(:,24)));
     
 	% Run simulation for duration of pertubation window
     ah.play();
     ah.waitForStop();
+%     display(ah.getTime());
 
     perticp = ah.getOprobeData('incisor_position'); 
-    perticv = ah.getOprobeData('incisor_velocity').*0.001; %m/s
-	
+    perticv = ah.getOprobeData('incisor_velocity'); %m/s
+    
+    perticp = perticp(window(:,1),:);
+    perticv = perticv(window(:,1),:);
+    perticv(:,2:4) = 0.001.*perticv(:,2:4);
+  
+
+
 	% Calculate Average ICP Acceleration a(t) = (v(tf)-v(t0))/(tf - t0)
 	pertaverageica = (perticv(end,2:4)-perticv(1,2:4))/(perticv(end,1)-perticv(1,1));
     
@@ -385,22 +409,22 @@ for i = 1:numSim
 	PertModelType				= pertModelType;
     t0Pert     					= min(window(:,2));
     tfPert     					= max(window(:,2));
-    PertWindowICPX     			= max(perticp(window(:,1),2));
-    PertWindowICPY     			= max(perticp(window(:,1),3));
-    PertWindowICPZ     			= max(perticp(window(:,1),4));
-    PertWindowICVX     			= max(perticv(window(:,1),1));
-	PertWindowICVY     			= max(perticv(window(:,1),2));
-	PertWindowICVZ     		    = max(perticv(window(:,1),3));
+    PertWindowICPX     			= perticp(end,2);
+    PertWindowICPY     			= perticp(end,3);
+    PertWindowICPZ     			= perticp(end,4);
+    PertWindowICVX     			= perticv(end,2);
+	PertWindowICVY     			= perticv(end,3);
+	PertWindowICVZ     		    = perticv(end,4);
 	PertWindowICAX     			= pertaverageica(1);
 	PertWindowICAY     			= pertaverageica(2);
 	PertWindowICAZ     			= pertaverageica(3);
 	PertExcitationFilePath     	= strcat(pwd, outputfilename,'\pertExcitationMagitudes.mat');
-	WindowICPX     				= max(icp(window(:,1),2));
-	WindowICPY     				= max(icp(window(:,1),3));
-	WindowICPZ     				= max(icp(window(:,1),4));
-	WindowICVX     				= max(icv(window(:,1),1));
-	WindowICVY     				= max(icv(window(:,1),2));
-	WinMaxICVZ     				= max(icv(window(:,1),3));
+	WindowICPX     				= icp(end,2);
+	WindowICPY     				= icp(end,3);
+	WindowICPZ     				= icp(end,4);
+	WindowICVX     				= icv(end,2);
+	WindowICVY     				= icv(end,3);
+	WinMaxICVZ     				= icv(end,4);
 	WindowICAX     				= averageica(1);
 	WindowICAY     				= averageica(2);
 	WindowICAZ     				= averageica(3);
