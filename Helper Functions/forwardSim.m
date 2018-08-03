@@ -236,16 +236,16 @@ ah.quit();
 
 % Get Smooth excitation forward plots
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(smoothExcitationM,0, muscles(:, [4 16 5 17 1 13]),'ForwHyoids-Digastrics',outputfilename);
+plotExcitations(smoothExcitationM,0, muscles(:, [4 16 5 17 1 13]),'ForwHyoids-Digastrics',outputfilename, window);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(smoothExcitationM,0, muscles(:, [2 14 3 15 12 24]),'ForwPterygoids',outputfilename);
+plotExcitations(smoothExcitationM,0, muscles(:, [2 14 3 15 12 24]),'ForwPterygoids',outputfilename, window);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(smoothExcitationM,0, muscles(:, [6 18 7 19 9 21]),'ForwTemperols',outputfilename);
+plotExcitations(smoothExcitationM,0, muscles(:, [6 18 7 19 9 21]),'ForwTemperols',outputfilename, window);
 
 % Masseters [10 22 11 23]
-plotExcitations(smoothExcitationM,0, muscles(:, [10 22 11 23]),'ForwMasseters',outputfilename);
+plotExcitations(smoothExcitationM,0, muscles(:, [10 22 11 23]),'ForwMasseters',outputfilename, window);
 
 % Perform excitation analysis in window for pre simulation plots
 perturbedExcitations = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
@@ -256,9 +256,17 @@ figure;
  plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
  view(0,0);
  hold on
+ plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
+ hold on
+ plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
+ hold on
  plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(0,0);
- legend('inverse ICP', 'forwardICP');
+ hold on
+ plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
+ hold on
+ plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
+ legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP');
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
@@ -270,9 +278,17 @@ figure;
  plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
  view(90,0)  % YZ
  hold on
+ plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
+ hold on
+ plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
+ hold on
  plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(90,0)  % YZ
- legend('inverse ICP', 'forwardICP');
+ hold on
+ plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
+ hold on
+ plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
+ legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP');
  ylabel('Y axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Tansverse View)');
@@ -280,7 +296,7 @@ figure;
  saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
 
 % Muscle excitation example
-plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [16 17]),0);
+plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [16 17]),0,0,window);
 saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 
 %Estimate completion time and report to dialog
@@ -304,14 +320,11 @@ end
 % Generate dialog to ask user if they want to procceed with know path deviation error
 question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
 	MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
-options.WindowStyle = 'normal';
 answer = questdlg(question,'Warning','Yes','No','No');
 % Handle response
 switch answer
     case 'Yes'
-        completetime = (0.25 * numSim);
-        fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f [s]\n'...
-            ,completetime);
+
     case 'No'
         simulationParamTableOut = 0;
         statvarTableOut = 0;
@@ -341,6 +354,7 @@ f = waitbar(0,'','Name','Pertubation Analysis...',...
     'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
 	
 for i = 1:numSim
+    counter = 0;
     % Check for clicked Cancel button
     if(getappdata(f,'canceling'))
         break
@@ -523,6 +537,8 @@ for i = 1:numSim
     tSim = toc;
     if(i == 1)
       esttime = tSim * numSim;
+      fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f %s\n'...
+      ,esttime,unit);
     else
       tElapsed = toc(tStart);
     end
@@ -542,7 +558,7 @@ for i = 1:numSim
     end
     
     % Update waitbar and message
-    waitbar(i/numSim,f,sprintf(strcat('Simulation Progress: %d%%\nTime remaining = %.2f  ', unit),...
+    waitbar(i/numSim,f,sprintf(strcat('Simulation Progress: %d%%\nTime remaining = %f  ', unit),...
         (i/numSim)*100,timeremaining));
     
 	% rewind simulation if we are doing more than 1
@@ -553,6 +569,22 @@ for i = 1:numSim
 		ah.quit();
     end
     
+    if(counter == 10000)
+        %Save data to file
+        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
+        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
+        writetable(pertExcitationMagitudes,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',',');
+        
+        %clear matlab var memory
+        simulationParamTable = [];
+        statvarTable = [];
+        pertExcitationMagitudes = 0;
+        counter = 0;
+        fprintf('Data dumped to file\n');
+    else
+        
+    end
+    counter = counter + 1;
 end
 	
 	% kill dialog and quit artisynth
@@ -574,11 +606,12 @@ end
     
     s = sprintf('Total simulation time = %.2f', tElapsed);
     fprintf(strcat(s,unit));
-	
-    %Save data to file
-    writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',')  
-    writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',')  
-    save(strcat(outputfilename,'\pertExcitationMagitudes.mat'),'pertExcitationMagitudes');
+    
+    if(numSim < 10000)
+        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
+        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
+        writetable(pertExcitationMagitudes,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',',');
+    end 
     
     % Return key data tables
     simulationParamTableOut = simulationParamTable;

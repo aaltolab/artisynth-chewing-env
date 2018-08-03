@@ -1,9 +1,17 @@
-function [] = plotExcitations(excitM,randPertExcit,muscles,groupName,outputfilename)
+function [] = plotExcitations(excitM,randPertExcit,muscles,groupName,outputfilename,pertwindow)
 %PLOTEXCITATIONS Summary of this function goes here
 %   Detailed explanation goes here
 desktop = com.mathworks.mde.desk.MLDesktop.getInstance;
-ymin = -0.01;
+ymin = -0.0001;
 ymax = 0.1;
+
+if exist('pertwindow','var')
+    t0 = pertwindow(1,end);
+    tf = pertwindow(end,end);
+else
+    t0 = 0;
+    tf = 0;
+end
 
 t = excitM(:,1);
 excitationsTemp = excitM(:,2:25);
@@ -26,9 +34,14 @@ if(randPertExcit == 0)
         drawnow;
         set(get(handle(figH(iFig)), 'javaframe'), 'GroupName', groupName);
         plot(t,excit(:,iFig),'b','LineWidth',1.2);
+        hold on
+        plot(t0,excit(pertwindow(1,1),iFig),'rv','MarkerSize', 9, 'MarkerFaceColor', 'r')
+        hold on
+        plot(tf,excit(pertwindow(end,1),iFig),'rv','MarkerSize',9, 'MarkerFaceColor', 'r')
         ylim([ymin ymax]); 
         xlabel('Time [s]');
         ylabel('Excitation [%]');
+        legend('Excitation','Pertubation Window');
         title(musclelabels(iFig));
         saveas(gcf,strcat(outputfilename, '\PreSimPlots\',groupName,'\',musclelabels(iFig),'.png'));
         pause(0.02);% Magic, reduces rendering errors
@@ -45,12 +58,17 @@ else
             ylim([ymin ymax]); 
             plot(t,excit(:,j),'b','LineWidth',1.2);
             hold on
+            plot(t0,excit(pertwindow(1,1),j),'rv','MarkerSize', 9, 'MarkerFaceColor', 'r')
+            hold on
+            plot(tf,excit(pertwindow(end,1),j),'rv','MarkerSize',9, 'MarkerFaceColor', 'r')
             ylim([ymin ymax]); 
             xlabel('Time [s]');
             ylabel('Excitation [%]');
             yyaxis right
             ylabel(musclelabels(j))
-            legend('Pertubation','No Pertubation');
+            legend('Pertubation','No Pertubation','Pertubation Window');
+            hold on
+
     end
 end
 end

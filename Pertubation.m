@@ -31,9 +31,9 @@ simTime = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 10;
+numSim = 250;
 t0PertWindow = 0.0; %s
-tfPertWindow = 0.06; %s
+tfPertWindow = 0.05; %s
 pertModelType = ["additive", "multiplicative"];
 pertShapeType = ["unitstep", "ramp"];
 
@@ -52,18 +52,25 @@ outputfilename = strcat('Output Data_', datestr(now,'mmmm_dd_yyyy_HH_MM'));
 [invExcitations,invICP,invICV] = ...
     inverseSim(simTime,invModelName);
 
+%------------------------PERTUBATION WINDOW GEN----------------------------
+% Create local pertubation window and shape function
+openWindow = createLocalPertWindow(invExcitations,t0PertWindow,tfPertWindow, fs);
+
+% Create local pertubation shape function
+openPertShape = createPertShape(pertShapeType(1),openWindow);
+
 %----------------------PLOT AND SAVE RAW EXCITATIONS-----------------------
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(invExcitations,0, muscles(:, [4 16 5 17 1 13]),'InvHyoids-Digastrics',outputfilename);
+plotExcitations(invExcitations,0, muscles(:, [4 16 5 17 1 13]),'InvHyoids-Digastrics',outputfilename,openWindow);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(invExcitations,0, muscles(:, [2 14 3 15 12 24]),'InvPterygoids',outputfilename);
+plotExcitations(invExcitations,0, muscles(:, [2 14 3 15 12 24]),'InvPterygoids',outputfilename,openWindow);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(invExcitations,0, muscles(:, [6 18 7 19 9 21]),'InvTemperols',outputfilename);
+plotExcitations(invExcitations,0, muscles(:, [6 18 7 19 9 21]),'InvTemperols',outputfilename,openWindow);
 
 % Masseters [10 22 11 23]
-plotExcitations(invExcitations,0, muscles(:, [10 22 11 23]),'InvMasseters',outputfilename);
+plotExcitations(invExcitations,0, muscles(:, [10 22 11 23]),'InvMasseters',outputfilename,openWindow);
 
 %------------------------SMOOTH EXCITATION SIGNAL--------------------------
 smoothExcitations = zeros(size(invExcitations));
@@ -72,13 +79,6 @@ smoothExcitations(:,1) = invExcitations(:,1);
 for i = 2:size(invExcitations,2)
      smoothExcitations(:,i) = smoothdata(invExcitations(:,i));
 end
-%------------------------------PERTUBATION---------------------------------
-% Create local pertubation window and shape function
-openWindow = createLocalPertWindow(invExcitations,t0PertWindow,tfPertWindow, fs);
-
-% Create local pertubation shape function
-openPertShape = createPertShape(pertShapeType(1),openWindow);
-
 %------------------------------FORWARDSIM----------------------------------
 %Load calculated excitations, run forward simulation, and collect position,
 %velocity, and force
@@ -95,8 +95,14 @@ openPertShape = createPertShape(pertShapeType(1),openWindow);
                  ,pertShapeType(1)...
                  ,invICP...
                  ,numSim...
-                 ,outputfilename...
+                 ,outputfilename...\\
                 );
-           
-
-
+            
+%  x = 0:0.1:pi;
+%  y = sin(x);
+%  plot(x,y)
+%  hold on
+%  plot(x(10),y(10),'r*')  % marking the 10th data point of x and y
+%   hold on
+% 
+%   plot(x(25),y(10),'r*')
