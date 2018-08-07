@@ -36,36 +36,30 @@ function [simulationParamTableOut, statvarTableOut] = ...
 %							the specific simulation.
 
 %----------------------FULL MUSCLE NAMES FOR IPROBES-----------------------
-lad     =  'Left Anterior Digastric';
-lip     =  'Left Inferior Lateral Pterygoid';
-lsp     =  'Left Superior Lateral Pterygoid';
-lam     =  'Left Anterior Mylohyoid';
-lgh     =  'Left Geniohyoid';
-% lpd     =  'Left Posterior Digastric';
-% lsh     =  'Left Stylohyoid';
-% lsth    =  'Left Sternohyoid' ;
 lat     =  'Left Anterior Temporal';
-lmt     =  'Left Middle Temporal';
-lpm     =  'Left Posterior Mylohyoid';
-lpt     =  'Left Posterior Temporal';
-ldm     =  'Left Deep Masseter';
-lsm     =  'Left Superficial Masseter';
-lmp     =  'Left Medial Pterygoid';
-rad     =  'Right Anterior Digastric';
-rip     =  'Right Inferior Lateral Pterygoid';
-rsp     =  'Right Superior Lateral Pterygoid';
-ram     =  'Right Anterior Mylohyoid';
-rgh     =  'Right Geniohyoid';
-% rpd     =  'Right Posterior Digastric';
-% rsh     =  'Right Stylohyoid';
-% rsteh   =  'Right Sternohyoid';
 rat     =  'Right Anterior Temporal';
+lmt     =  'Left Middle Temporal';
 rmt     =  'Right Middle Temporal';
-rpm     =  'Right Posterior Mylohyoid';
+lpt     =  'Left Posterior Temporal';
 rpt     =  'Right Posterior Temporal';
-rdm     =  'Right Deep Masseter';
+lsm     =  'Left Superficial Masseter';
 rsm     =  'Right Superficial Masseter';
-rmp     =  'Right Medial Pterygoid';					
+ldm     =  'Left Deep Masseter';
+rdm     =  'Right Deep Masseter';
+lmp     =  'Left Medial Pterygoid';
+rmp     =  'Right Medial Pterygoid';		
+lsp     =  'Left Superior Lateral Pterygoid';
+rsp     =  'Right Superior Lateral Pterygoid';
+lip     =  'Left Inferior Lateral Pterygoid';
+rip     =  'Right Inferior Lateral Pterygoid';
+lad     =  'Left Anterior Digastric';
+rad     =  'Right Anterior Digastric';
+lam     =  'Left Mylohyoid';
+ram     =  'Right Mylohyoid';
+lpm     =  'Left Posterior Mylohyoid';
+rpm     =  'Right Posterior Mylohyoid';
+lgh     =  'Left Geniohyoid';
+rgh     =  'Right Geniohyoid';					
 
 smoothExcitations = smoothExcitationM(:,2:25);
 t = smoothExcitationM(:,1,1);
@@ -95,30 +89,57 @@ statvarTableCol = {
 				'AvgICAX' 				
 				'AvgICAY' 				
 				'AvgICAZ'
-				'lad' 
-				'lip' 
-				'lsp' 
-				'lam' 
-				'lgh' 
 				'lat' 
-				'lmt' 
-				'lpm' 
-				'lpt' 
-				'ldm' 
-				'lsm' 
-				'lmp' 
-				'rad' 
-				'rip' 
-				'rsp' 
-				'ram' 
-				'rgh' 
 				'rat' 
+				'lmt' 
 				'rmt' 
-				'rpm' 
+				'lpt' 
 				'rpt' 
-				'rdm' 
+				'lsm' 
 				'rsm' 
+				'ldm' 
+				'rdm' 
+				'lmp' 
 				'rmp' 
+				'lsp' 
+				'rsp' 
+				'lip' 
+				'rip' 
+				'lad' 
+				'rad' 
+				'lam' 
+				'ram' 
+				'lpm' 
+				'rpm' 
+				'lgh' 
+				'rgh' 
+			 }';
+         
+pertMagTableCol = {			   			 			 							   						
+				'lat' 
+				'rat' 
+				'lmt' 
+				'rmt' 
+				'lpt' 
+				'rpt' 
+				'lsm' 
+				'rsm' 
+				'ldm' 
+				'rdm' 
+				'lmp' 
+				'rmp' 
+				'lsp' 
+				'rsp' 
+				'lip' 
+				'rip' 
+				'lad' 
+				'rad' 
+				'lam' 
+				'ram' 
+				'lpm' 
+				'rpm' 
+				'lgh' 
+				'rgh' 
 			 }';
 			 
 simulationParamTableCol = {
@@ -132,13 +153,12 @@ simulationParamTableCol = {
 						'PertModelType'
 						't0Pert'     						
 						'tfPert'    						
-						'PertExcitationFilePath'     	  				
-						'ExcitationFilePath' 
 					   }';
 			
 				
 			 
 statvarTable = cell2table(cell(0,length(statvarTableCol)), 'VariableNames', statvarTableCol);
+pertMagTable = cell2table(cell(0,length(pertMagTableCol)), 'VariableNames', pertMagTableCol);
 simulationParamTable = cell2table(cell(0,length(simulationParamTableCol)), 'VariableNames', simulationParamTableCol);
 
 %-------------------------FORWARD SIMULATIONS------------------------------
@@ -236,16 +256,16 @@ ah.quit();
 
 % Get Smooth excitation forward plots
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(smoothExcitationM,0, muscles(:, [4 16 5 17 1 13]),'ForwHyoids-Digastrics',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputfilename, window);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(smoothExcitationM,0, muscles(:, [2 14 3 15 12 24]),'ForwPterygoids',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputfilename, window);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(smoothExcitationM,0, muscles(:, [6 18 7 19 9 21]),'ForwTemperols',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputfilename, window);
 
 % Masseters [10 22 11 23]
-plotExcitations(smoothExcitationM,0, muscles(:, [10 22 11 23]),'ForwMasseters',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputfilename, window);
 
 % Perform excitation analysis in window for pre simulation plots
 perturbedExcitations = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
@@ -270,7 +290,7 @@ figure;
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
- xlim([-0.5 0.5]); 
+ xlim([-0.25 0.25]); 
  saveas(gcf,strcat(outputfilename, '\PreSimPlots', '\FrontalView.png'));
  
  % Transverse view on ICP
@@ -292,7 +312,6 @@ figure;
  ylabel('Y axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Tansverse View)');
- xlim([-0.5 0.5]);
  saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
 
 % Muscle excitation example
@@ -300,7 +319,7 @@ plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [16 17]),0,0,
 saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 
 %Estimate completion time and report to dialog
-pertExcitationMagitudes = zeros(numSim,24);
+pertExcitationMagnitudes = zeros(numSim,24);
 completionTime = 0.25 * numSim;
 
 if(completionTime <= 60)
@@ -352,9 +371,9 @@ end
 tStart = tic;
 f = waitbar(0,'','Name','Pertubation Analysis...',...
     'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
-	
+count = 0;	
 for i = 1:numSim
-    counter = 0;
+
     % Check for clicked Cancel button
     if(getappdata(f,'canceling'))
         break
@@ -367,7 +386,7 @@ for i = 1:numSim
     [perturbedExcitations,...
         pertExcitMuscleMags] = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
     
-    pertExcitationMagitudes(i,:) = pertExcitMuscleMags;
+    pertMagTable = [pertMagTable;num2cell(pertExcitMuscleMags)];
     
     ah.setIprobeData (lat  ,horzcat(t,perturbedExcitations(:,1)));
 	ah.setIprobeData (rat  ,horzcat(t,perturbedExcitations(:,2)));
@@ -432,7 +451,6 @@ for i = 1:numSim
 	PertWindowICAX     			= pertaverageica(1);
 	PertWindowICAY     			= pertaverageica(2);
 	PertWindowICAZ     			= pertaverageica(3);
-	PertExcitationFilePath     	= strcat(pwd, outputfilename,'\pertExcitationMagitudes.mat');
 	WindowICPX     				= icp(end,2);
 	WindowICPY     				= icp(end,3);
 	WindowICPZ     				= icp(end,4);
@@ -442,7 +460,6 @@ for i = 1:numSim
 	WindowICAX     				= averageica(1);
 	WindowICAY     				= averageica(2);
 	WindowICAZ     				= averageica(3);
-	ExcitationFilePath     		= strcat(pwd,outputfilename,'\excitations.mat');
 	ladPertExcit				= pertExcitMuscleMags(1);	   
 	lipPertExcit				= pertExcitMuscleMags(2);	   
 	lspPertExcit				= pertExcitMuscleMags(3);	   
@@ -478,9 +495,7 @@ for i = 1:numSim
 							  PertShapeFunction
 							  PertModelType
 							  t0Pert     						
-							  tfPert     						
-							  PertExcitationFilePath     	  				
-							  ExcitationFilePath     		
+							  tfPert     						 		
 						    }';  
 	
 	% Save IVs and DVs to row vector	
@@ -568,23 +583,6 @@ for i = 1:numSim
     else
 		ah.quit();
     end
-    
-    if(counter == 10000)
-        %Save data to file
-        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
-        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
-        writetable(pertExcitationMagitudes,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',',');
-        
-        %clear matlab var memory
-        simulationParamTable = [];
-        statvarTable = [];
-        pertExcitationMagitudes = 0;
-        counter = 0;
-        fprintf('Data dumped to file\n');
-    else
-        
-    end
-    counter = counter + 1;
 end
 	
 	% kill dialog and quit artisynth
@@ -607,11 +605,9 @@ end
     s = sprintf('Total simulation time = %.2f', tElapsed);
     fprintf(strcat(s,unit));
     
-    if(numSim < 10000)
-        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
-        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
-        writetable(pertExcitationMagitudes,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',',');
-    end 
+	writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
+	writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
+	writetable(pertMagTable,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',','); 
     
     % Return key data tables
     simulationParamTableOut = simulationParamTable;

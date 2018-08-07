@@ -1,28 +1,27 @@
-lad     =  'Left Anterior Digastric';
-lip     =  'Left Inferior Lateral Pterygoid';
-lsp     =  'Left Superior Lateral Pterygoid';
-lam     =  'Left Anterior Mylohyoid';
-lgh     =  'Left Geniohyoid';
 lat     =  'Left Anterior Temporal';
-lmt     =  'Left Middle Temporal';
-lpm     =  'Left Posterior Mylohyoid';
-lpt     =  'Left Posterior Temporal';
-ldm     =  'Left Deep Masseter';
-lsm     =  'Left Superficial Masseter';
-lmp     =  'Left Medial Pterygoid';
-rad     =  'Right Anterior Digastric';
-rip     =  'Right Inferior Lateral Pterygoid';
-rsp     =  'Right Superior Lateral Pterygoid';
-ram     =  'Right Anterior Mylohyoid';
-rgh     =  'Right Geniohyoid';
 rat     =  'Right Anterior Temporal';
+lmt     =  'Left Middle Temporal';
 rmt     =  'Right Middle Temporal';
-rpm     =  'Right Posterior Mylohyoid';
+lpt     =  'Left Posterior Temporal';
 rpt     =  'Right Posterior Temporal';
-rdm     =  'Right Deep Masseter';
+lsm     =  'Left Superficial Masseter';
 rsm     =  'Right Superficial Masseter';
-rmp     =  'Right Medial Pterygoid';					
-
+ldm     =  'Left Deep Masseter';
+rdm     =  'Right Deep Masseter';
+lmp     =  'Left Medial Pterygoid';
+rmp     =  'Right Medial Pterygoid';		
+lsp     =  'Left Superior Lateral Pterygoid';
+rsp     =  'Right Superior Lateral Pterygoid';
+lip     =  'Left Inferior Lateral Pterygoid';
+rip     =  'Right Inferior Lateral Pterygoid';
+lad     =  'Left Anterior Digastric';
+rad     =  'Right Anterior Digastric';
+lam     =  'Left Anterior Mylohyoid';
+ram     =  'Right Anterior Mylohyoid';
+lpm     =  'Left Posterior Mylohyoid';
+rpm     =  'Right Posterior Mylohyoid';
+lgh     =  'Left Geniohyoid';
+rgh     =  'Right Geniohyoid';
 
 ----------------Not being used-------------------
 % lpd     =  'Left Posterior Digastric';

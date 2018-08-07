@@ -1,18 +1,22 @@
-function [] = writeToExcitFiles(path,t0,tf,excitations)
+function [] = writeToExcitFiles(path,t0,tf,excit,muscles)
 %WRITETOEXCITFILES Summary of this function goes here
 %   IN PROGRESS
 	
-	t0 = num2str(t0,'%.4f');
-	tf = num2str(tf,'%.4f');
-	numSteps = num2str(size(excitatations,1),'%d');
-	t = excitations(:,1);
-    muscles = 1:1:size(excitations,2)-1;
+	numSteps = num2str(size(excit,1),'%d');    
+    t = excit(:,1);
+    excitationsTemp = excit(:,2:25);
+    muscleids = cell2mat(muscles(1,:));
+    musclelabels = string(muscles(2,:));
+    excitations = excitationsTemp(:,muscleids);
 	
-	for i = 1:size(t,1)
-		fid = fopen(strcat(path,'\', muscles(i)),'wt');
-		fprintf(fid, '%s\t %s\t %s\n', t0,tf,'1.0');
-		fprintf(fid, '%s\t %s\t %s\n', 'Cubic',numSteps,'explicit');
-		dlmwrite(strcat(path,'\', muscles(i)),horzcat(t,excitations(:,i)) ,'-append','delimiter','\t' );
-		fclose(fid);
-	end
+    for m = 1:size(muscles,2)
+        musclefilepath = strcat(path,"\", musclelabels(m),".txt");        
+        fid = fopen(musclefilepath,'wt');
+        fprintf(fid, "%s\t %s\t %s\n", num2str(t0),num2str(tf),"1.0");
+        fprintf(fid, "%s\t %s\t %s\n", "Cubic",num2str(numSteps),"explicit");
+        dlmwrite(musclefilepath,horzcat(t,excitations(:,m)),'-append','delimiter','\t' );
+        fclose(fid);
+    end
+    display('Smooth excitations successfully written to input probe files');
 end
+

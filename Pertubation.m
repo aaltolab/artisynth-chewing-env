@@ -21,9 +21,9 @@ rng('shuffle');
 
 %-------------------------MUSCLE DEFINITIONS------------------------------
 muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
-           'lad','lip','lsp','lam','lgh','lat','lmt','lpm','lpt','ldm',...
-           'lsm','lmp','rad','rip','rsp','ram','rgh','rat','rmt','rpm',...
-           'rpt','rdm','rsm','rmp'};
+           'lat','rat','lmt','rmt','lpt','rpt','lsm','rsm','ldm','rdm',...
+           'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
+           'lpm','rpm','lgh','rgh'};
        
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables
@@ -31,7 +31,7 @@ simTime = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 250;
+numSim = 100;
 t0PertWindow = 0.0; %s
 tfPertWindow = 0.05; %s
 pertModelType = ["additive", "multiplicative"];
@@ -61,16 +61,16 @@ openPertShape = createPertShape(pertShapeType(1),openWindow);
 
 %----------------------PLOT AND SAVE RAW EXCITATIONS-----------------------
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(invExcitations,0, muscles(:, [4 16 5 17 1 13]),'InvHyoids-Digastrics',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [17 18 19 20 21 22 23 24]),'InvHyoids-Digastrics',outputfilename,openWindow);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(invExcitations,0, muscles(:, [2 14 3 15 12 24]),'InvPterygoids',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [11 12 13 14 15 16]),'InvPterygoids',outputfilename,openWindow);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(invExcitations,0, muscles(:, [6 18 7 19 9 21]),'InvTemperols',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [1 2 3 4 5 6]),'InvTemperols',outputfilename,openWindow);
 
 % Masseters [10 22 11 23]
-plotExcitations(invExcitations,0, muscles(:, [10 22 11 23]),'InvMasseters',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [7 8 9 10]),'InvMasseters',outputfilename,openWindow);
 
 %------------------------SMOOTH EXCITATION SIGNAL--------------------------
 smoothExcitations = zeros(size(invExcitations));
@@ -97,12 +97,5 @@ end
                  ,numSim...
                  ,outputfilename...\\
                 );
-            
-%  x = 0:0.1:pi;
-%  y = sin(x);
-%  plot(x,y)
-%  hold on
-%  plot(x(10),y(10),'r*')  % marking the 10th data point of x and y
-%   hold on
-% 
-%   plot(x(25),y(10),'r*')
+% Write smooth excitations to excitation probe input files for forward sim.            
+writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);
