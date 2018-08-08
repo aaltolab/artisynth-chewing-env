@@ -320,7 +320,7 @@ saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 
 %Estimate completion time and report to dialog
 pertExcitationMagnitudes = zeros(numSim,24);
-completionTime = 0.25 * numSim;
+completionTime = 0.2 * numSim;
 
 if(completionTime <= 60)
     unit = '[sec].';
@@ -549,31 +549,31 @@ for i = 1:numSim
 	statvarTable = [statvarTable;statparameters];
 	
 	% Updated estimated simulation completion time 
-    tSim = toc;
-    if(i == 1)
-      esttime = tSim * numSim;
-      fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f %s\n'...
-      ,esttime,unit);
-    else
-      tElapsed = toc(tStart);
+   tSim = toc;
+   tElapsed = toc(tStart);
+   esttime = (tElapsed/i)*(numSim-i); 
+   
+   if(i == 1)
+        fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f %s\n'...
+        ,completionTime,unit);
     end
-
+    
     if(esttime <= 60)
         unit = '[sec]';
-        timeremaining = esttime-tElapsed;
+        timeremaining = (tElapsed/i)*(numSim-i);
     elseif(esttime > 60 && esttime <= 3600)
         unit = '[min]';
-        timeremaining = (esttime-tElapsed)/60;
+        timeremaining = ((tElapsed/i)*(numSim-i))/60;
     elseif(esttime > 3600 && esttime < 86400)
         unit = '[hours]';
-        timeremaining = (esttime-tElapsed)/3600;
+        timeremaining = ((tElapsed/i)*(numSim-i))/3600;
     elseif(esttime >= 86400)
         unit = '[days]';
-        timeremaining = (esttime-tElapsed)/86400;
+        timeremaining = ((tElapsed/i)*(numSim-i))/86400;
     end
     
     % Update waitbar and message
-    waitbar(i/numSim,f,sprintf(strcat('Simulation Progress: %d%%\nTime remaining = %f  ', unit),...
+    waitbar(i/numSim,f,sprintf(strcat('Simulation Progress: %.2f%%\nTime remaining = %.2f ', unit),...
         (i/numSim)*100,timeremaining));
     
 	% rewind simulation if we are doing more than 1

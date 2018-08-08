@@ -43,7 +43,7 @@ if(randPertExcit == 0)
         ylabel('Excitation [%]');
         legend('Excitation','Pertubation Window');
         title(musclelabels(iFig));
-        saveas(gcf,strcat(outputfilename, '\PreSimPlots\',groupName,'\',musclelabels(iFig),'.png'));
+        saveas(gcf,strcat(outputfilename, '\PreSimPlots\',groupName,'\',musclelabels(iFig),'.pdf'));
         pause(0.02);% Magic, reduces rendering errors
     end
     warning(bakWarn);

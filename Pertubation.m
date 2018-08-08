@@ -31,7 +31,7 @@ simTime = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 100;
+numSim = 200;
 t0PertWindow = 0.0; %s
 tfPertWindow = 0.05; %s
 pertModelType = ["additive", "multiplicative"];
