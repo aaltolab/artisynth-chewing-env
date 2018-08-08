@@ -146,7 +146,6 @@ simulationParamTableCol = {
 						'Simulation'					
 						'SimDuration'     			
 						'SimTimeStep'
-						'Muscles'
 						'InvSimName'     				
 						'ForwardSimName'     			
 						'PertShapeFunction'
@@ -436,7 +435,6 @@ for i = 1:numSim
     SimDuration     			= max(perturbedExcitations(:,1));
     SimTimeStep     			= perturbedExcitations(2,1) - perturbedExcitations(1,1);
     InvSimName     				= invModelName;
-	Muscles						= muscles;
     ForwardSimName     			= forwardModelName;
     PertShapeFunction     		= pertShapeType;
 	PertModelType				= pertModelType;
@@ -489,7 +487,6 @@ for i = 1:numSim
 	simulationparameters = {  Simulation					
 							  SimDuration     			
 							  SimTimeStep
-							  Muscles
 							  InvSimName     				
 							  ForwardSimName     			
 							  PertShapeFunction
@@ -583,6 +580,33 @@ for i = 1:numSim
     else
 		ah.quit();
     end
+    
+    if ~(mod(i,10000))
+        if(i == 10000)
+            fid = fopen(strcat(outputfilename,"/statvarTable.txt"),"wt");
+            statvarheader = strings(size(statvarTableCol));
+            [statvarheader{:}] = statvarTableCol{:};
+            fprintf(fid, "%s,",statvarheader{1:end-1});
+            fprintf(fid, "%s\n",statvarheader{end});
+            dlmwrite(strcat(outputfilename,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
+            statvarTable(:,:) = [];
+            fclose(fid);           
+            
+            fid = fopen(strcat(outputfilename,"/pertMagTable.txt"),"wt");
+            pertmagheader = strings(size(pertMagTableCol));
+            [pertmagheader{:}] = pertMagTableCol{:};
+            fprintf(fid, "%s,",pertmagheader{1:end-1});
+            fprintf(fid, "%s\n",pertmagheader{end});
+            dlmwrite(strcat(outputfilename,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
+            pertMagTable(:,:) = [];
+            fclose(fid);
+        else
+           dlmwrite(strcat(outputfilename,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
+           dlmwrite(strcat(outputfilename,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
+           statvarTable(:,:) = [];
+           pertMagTable(:,:) = [];
+        end
+    end
 end
 	
 	% kill dialog and quit artisynth
@@ -602,16 +626,16 @@ end
         tElapsed = (tElapsed)/86400;
     end
     
-    s = sprintf('Total simulation time = %.2f', tElapsed);
+    s = sprintf('Total simulation time = %.2f ', tElapsed);
     fprintf(strcat(s,unit));
     
-	writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
-	writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');
-	writetable(pertMagTable,strcat(outputfilename,'/pertExcitationMagitudes.txt'),'Delimiter',','); 
+    if (numSim < 10000)
+        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
+        writetable(pertMagTable,strcat(outputfilename,'/pertMagTable.txt'),'Delimiter',',');
+    end
+    writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');
     
     % Return key data tables
     simulationParamTableOut = simulationParamTable;
 	statvarTableOut = statvarTable;
 end
-
-
