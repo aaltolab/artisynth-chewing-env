@@ -31,9 +31,9 @@ simTime = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 200;
-t0PertWindow = 0.0; %s
-tfPertWindow = 0.05; %s
+numSim = 350000;
+t0PertWindow = 0.25; %s
+tfPertWindow = 0.3; %s
 pertModelType = ["additive", "multiplicative"];
 pertShapeType = ["unitstep", "ramp"];
 
@@ -61,16 +61,16 @@ openPertShape = createPertShape(pertShapeType(1),openWindow);
 
 %----------------------PLOT AND SAVE RAW EXCITATIONS-----------------------
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(invExcitations,0, muscles(:, [17 18 19 20 21 22 23 24]),'InvHyoids-Digastrics',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [17 18 19 20 21 22 23 24]),'InvHyoids-Digastrics',outputfilename,openWindow,invICP);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(invExcitations,0, muscles(:, [11 12 13 14 15 16]),'InvPterygoids',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [11 12 13 14 15 16]),'InvPterygoids',outputfilename,openWindow,invICP);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(invExcitations,0, muscles(:, [1 2 3 4 5 6]),'InvTemperols',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [1 2 3 4 5 6]),'InvTemperols',outputfilename,openWindow,invICP);
 
 % Masseters [10 22 11 23]
-plotExcitations(invExcitations,0, muscles(:, [7 8 9 10]),'InvMasseters',outputfilename,openWindow);
+plotExcitations(invExcitations,0, muscles(:, [7 8 9 10]),'InvMasseters',outputfilename,openWindow,invICP);
 
 %------------------------SMOOTH EXCITATION SIGNAL--------------------------
 smoothExcitations = zeros(size(invExcitations));

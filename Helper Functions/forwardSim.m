@@ -255,21 +255,23 @@ ah.quit();
 
 % Get Smooth excitation forward plots
 % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputfilename, window,icpFull);
 
 % Pterygoids [3 14 3 15 12 24]
-plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputfilename, window,icpFull);
 
 % Temperols [6 18 7 19 9 21]
-plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputfilename, window,icpFull);
 
 % Masseters [10 22 11 23]
-plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputfilename, window);
+plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputfilename, window,icpFull);
 
 % Perform excitation analysis in window for pre simulation plots
 perturbedExcitations = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
 
 % Generate pre simulation plots
+[maxNumInv maxIndexInv] = min(invICP(:,4));
+[maxNumForw maxIndexForw] = min(icpFull(:,4));
 % Frontal view on ICP
 figure;
  plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
@@ -278,6 +280,8 @@ figure;
  plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
  hold on
  plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
+ hold on;
+ plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
  hold on
  plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(0,0);
@@ -285,7 +289,9 @@ figure;
  plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
  hold on
  plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP');
+ hold on
+ plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+ legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
@@ -301,20 +307,24 @@ figure;
  hold on
  plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
  hold on
+ plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+ hold on
  plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
  view(90,0)  % YZ
  hold on
  plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
  hold on
  plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP');
+ hold on
+ plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+ legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
  ylabel('Y axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Tansverse View)');
  saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
 
 % Muscle excitation example
-plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [16 17]),0,0,window);
+plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [20 21]),0,0,window,icpFull);
 saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 
 %Estimate completion time and report to dialog
@@ -630,7 +640,7 @@ end
     fprintf(strcat(s,unit));
     
     if (numSim < 10000)
-        writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');  
+        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');  
         writetable(pertMagTable,strcat(outputfilename,'/pertMagTable.txt'),'Delimiter',',');
     end
     writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');
