@@ -3,6 +3,7 @@ function [perturbedExcitMsOut,pertShapeMagnitutdes] = performExcitationAnalysis(
 %   Detailed explanation goes here
 
 % Set all negative values in smoothed matricies to 0
+rng('shuffle');
 excitMs(excitMs<0)=0;
 muscleids =  cell2mat(muscles(1,:));
 

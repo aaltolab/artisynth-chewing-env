@@ -63,7 +63,6 @@ function [] = plotExcitations(excitM,randPertExcit,muscles,groupName,outputfilen
                 else
                     ylim([ymin ymax]);    
                 end
-                ylim([ymin ymax]); 
                 xlabel('Time [s]');
                 ylabel('Excitation [%]');
                 yyaxis right

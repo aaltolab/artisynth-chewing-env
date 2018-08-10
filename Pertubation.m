@@ -25,13 +25,15 @@ muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
            'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
            'lpm','rpm','lgh','rgh'};
        
+deactivatemuscles = muscles(:,[15 16]);
+       
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables
 simTime = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 350000;
+numSim = 200;
 t0PertWindow = 0.25; %s
 tfPertWindow = 0.3; %s
 pertModelType = ["additive", "multiplicative"];
@@ -50,7 +52,7 @@ outputfilename = strcat('Output Data_', datestr(now,'mmmm_dd_yyyy_HH_MM'));
 %Load, run, and extract Inverse simulation data
 % Inverse Simulation
 [invExcitations,invICP,invICV] = ...
-    inverseSim(simTime,invModelName);
+    inverseSim(simTime,invModelName,deactivatemuscles);
 
 %------------------------PERTUBATION WINDOW GEN----------------------------
 % Create local pertubation window and shape function
@@ -85,7 +87,7 @@ end
 
 % Forward Simulation
 [simulationParamTable, statvarTable] = ...
-     forwardSim(  smoothExcitations...
+     pertStudy(  smoothExcitations...
                  ,openWindow...
                  ,openPertShape...
                  ,muscles...
