@@ -32,7 +32,7 @@ if length(x)>1  % vector input
     for I=1:length(x)
         switch nargin
         case 1
-            linetype='r:';
+            linetype=':';
             label='';
         case 2
             if ~iscell(in1)

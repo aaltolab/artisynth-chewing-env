@@ -12,7 +12,6 @@
 %   Case 4: 
 %
 % 4. Pertubation study with removed muscles inverse.
-%
 
 %--------------------CLEAR WORKSPACE AND SHUFFLE RNDGEN--------------------
 clc;
@@ -25,15 +24,22 @@ muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
            'lat','rat','lmt','rmt','lpt','rpt','lsm','rsm','ldm','rdm',...
            'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
            'lpm','rpm','lgh','rgh'};
-       
-deactivatemuscles = muscles(:,[3 5]);
+      
+leftsidecorprocess = muscles(:,[3 5]);
+rightsidecorprocess = muscles(:,[4 6]);
+leftpterygoids = muscles(:,[11 13 15]);
+righttpterygoids = muscles(:,[12 14 16]);       
+submentalmuscles = muscles(:,[17 18 19 20 21 22 23 24]);
+
+deactivatedmuscles = leftsidecorprocess;
+
 
 invModelName = ...
     'artisynth.models.kieran.tmjsurgery.TmjInverseOpenCloseSimulation';
 forwardModelName = ...
     'artisynth.models.kieran.tmjsurgery.ForwardChewing';
 
-outputfilename = strcat('Surgery Data_', datestr(now,'mmmm_dd_yyyy_HH_MM'));
+outputfilename = strcat('na', datestr(now,'mmmm_dd_yyyy_HH_MM'));
 mkdir(outputfilename);
 
 simTime = 0.5; %s
@@ -51,7 +57,7 @@ smoothExcitations(:,1) = trackingExcitations(:,1);
 for i = 2:size(trackingExcitations,2)
      smoothExcitations(:,i) = smoothdata(trackingExcitations(:,i));
 end
-
+writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);
 %-----------------------------FORWARD PRE-OP-------------------------------
 [preOpICP,preOpICV] = ...
     forwardSim(simTime,forwardModelName,smoothExcitations);
@@ -59,7 +65,7 @@ end
 %-----------------------------FORWARD SIM----------------------------------
 % Remove muscle at left proccess
 [postOpICP,postOpICV] = ...
-    forwardSim(simTime,forwardModelName,smoothExcitations,deactivatedmuscles);
+    forwardSim(simTime,forwardModelName,smoothExcitations);
 
 %-----------------------------INCISOR PLOTS---------------------------------
 % Generate pre simulation plots
@@ -88,10 +94,8 @@ figure;
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Frontal View)');
-%  xmax = max(postOpICP(:,2)) + 0.05*max(postOpICP(:,2));
-%  xmin = min(postOpICP(:,2)) - 0.05*min(postOpICP(:,2));
-%  xlim([xmin xmax]);    
-     saveas(gcf,strcat(outputfilename, '\FrontalView.pdf'));
+ 
+saveas(gcf,strcat(outputfilename, '\FrontalView.pdf'));
  
  % Transverse view on ICP
 figure;

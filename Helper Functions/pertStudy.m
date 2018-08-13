@@ -67,7 +67,8 @@ simTime = max(t);
 
 %-------------------------OUTPUT DATA HEADERS------------------------------
 statvarTableCol = {
-				'Simulation' 				   			 			 							   						
+				'Simulation' 
+                'Pertt0'
 				'PertICPX'     			
 				'PertICPY'     			
 				'PertICPZ'     			
@@ -212,7 +213,7 @@ icvFull = ah.getOprobeData('incisor_velocity');
 icaFull = 0;
 
 %Select position and velocity only within specified pertubation window
-icp = icpFull(window(:,1),:);
+icp = icpFull(21:31,:);
 icv = icvFull(window(:,1),:);
 icv(:,2:4) = icv(:,2:4).*0.001; % Convert mm/s to m/s
 
@@ -316,19 +317,19 @@ end
 	
 
 % Generate dialog to ask user if they want to procceed with know path deviation error
-question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
-	MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
-answer = questdlg(question,'Warning','Yes','No','No');
-% Handle response
-switch answer
-    case 'Yes'
-
-    case 'No'
-        simulationParamTableOut = 0;
-        statvarTableOut = 0;
-        disp('Pertubation analysis aborted');
-        return;
-end
+% question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
+% 	MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
+% answer = questdlg(question,'Warning','Yes','No','No');
+% % Handle response
+% switch answer
+%     case 'Yes'
+% 
+%     case 'No'
+%         simulationParamTableOut = 0;
+%         statvarTableOut = 0;
+%         disp('Pertubation analysis aborted');
+%         return;
+% end
  
 % Start artisynth for pertubation analysis
 ah = artisynth('-noGui','-model',forwardModelName);
@@ -403,15 +404,13 @@ for i = 1:numSim
     perticp = perticp(window(:,1),:);
     perticv = perticv(window(:,1),:);
     perticv(:,2:4) = 0.001.*perticv(:,2:4);
-  
-
-
+ 
 	% Calculate Average ICP Acceleration a(t) = (v(tf)-v(t0))/(tf - t0)
 	pertaverageica = (perticv(end,2:4)-perticv(1,2:4))/(perticv(end,1)-perticv(1,1));
     
-    
 	% Log all variables from simulation
     Simulation					= i;
+    Pertt0                      = min(window(:,2));
     SimDuration     			= max(perturbedExcitations(:,1));
     SimTimeStep     			= perturbedExcitations(2,1) - perturbedExcitations(1,1);
     InvSimName     				= invModelName;
@@ -476,7 +475,8 @@ for i = 1:numSim
 						    }';  
 	
 	% Save IVs and DVs to row vector	
-	statparameters = {  Simulation					   			 			 							   						
+	statparameters = {  Simulation
+                        Pertt0
 						PertWindowICPX     			
 						PertWindowICPY     			
 						PertWindowICPZ     			

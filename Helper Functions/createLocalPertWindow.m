@@ -22,16 +22,11 @@ function [window] = createLocalPertWindow(compExcitM,t0,t1, fs)
 	temp=zeros(size((t0:dt:t1)'));
 	horzcat(temp, (t0:dt:t1)');
 
-	window=horzcat(temp, (t0:dt:t1)');
-	first = 0;
+	window = horzcat(temp, (t0:dt:t1)');
+	first = find(compExcitM(:,1)<=t0,1,'last');
 
-	for i = 1:size(compExcitM,1)
-		if(t0 == compExcitM(i,1))
-			first = i;
-		end      
-	end
 	for j = 1:length(window(:,1))
 		window(j,1) = first;
 		first = first + 1;
-	end  
+    end 
 end
