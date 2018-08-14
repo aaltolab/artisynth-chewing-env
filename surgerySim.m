@@ -24,14 +24,19 @@ muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
            'lat','rat','lmt','rmt','lpt','rpt','lsm','rsm','ldm','rdm',...
            'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
            'lpm','rpm','lgh','rgh'};
-      
+
+%-------------------------MUSCLE DEACTIVE CASES----------------------------
 leftsidecorprocess = muscles(:,[3 5]);
 rightsidecorprocess = muscles(:,[4 6]);
+bothcorprocess = muscles(:,[3 4 5 6]);
 leftpterygoids = muscles(:,[11 13 15]);
-righttpterygoids = muscles(:,[12 14 16]);       
+righttpterygoids = muscles(:,[12 14 16]);
+allpterygoids = muscles(:,[11 12 13 14 15 16]);
+leftsubmentalmuscles = muscles(:,[17 19 21 23]);
+rightsubmentalmuscles = muscles(:,[18 20 22 24]);
 submentalmuscles = muscles(:,[17 18 19 20 21 22 23 24]);
 
-deactivatedmuscles = leftsidecorprocess;
+deactivatedmuscles = leftpterygoids;
 
 
 invModelName = ...
@@ -39,7 +44,7 @@ invModelName = ...
 forwardModelName = ...
     'artisynth.models.kieran.tmjsurgery.ForwardChewing';
 
-outputfilename = strcat('na', datestr(now,'mmmm_dd_yyyy_HH_MM'));
+outputfilename = strcat('comp_forward_leftpterygoids', datestr(now,'mmmm_dd_yyyy_HH_MM'));
 mkdir(outputfilename);
 
 simTime = 0.5; %s
@@ -57,15 +62,25 @@ smoothExcitations(:,1) = trackingExcitations(:,1);
 for i = 2:size(trackingExcitations,2)
      smoothExcitations(:,i) = smoothdata(trackingExcitations(:,i));
 end
-writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);
+% writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);
 %-----------------------------FORWARD PRE-OP-------------------------------
 [preOpICP,preOpICV] = ...
     forwardSim(simTime,forwardModelName,smoothExcitations);
 
 %-----------------------------FORWARD SIM----------------------------------
+[compExcit,compICP,compICV] = ...
+    inverseSim(simTime,invModelName,deactivatedmuscles);
+
+smoothCompExcitations = zeros(size(compExcit));
+smoothCompExcitations(:,1) = compExcit(:,1);
+
+for i = 2:size(compExcit,2)
+     smoothCompExcitations(:,i) = smoothdata(compExcit(:,i));
+end
+
 % Remove muscle at left proccess
 [postOpICP,postOpICV] = ...
-    forwardSim(simTime,forwardModelName,smoothExcitations);
+    forwardSim(simTime,forwardModelName,smoothCompExcitations);
 
 %-----------------------------INCISOR PLOTS---------------------------------
 % Generate pre simulation plots
@@ -93,6 +108,7 @@ figure;
  legend('Pre Op ICP', 'Pre Op  Initial ICP', 'Pre Op  Final ICP', 'Pre Op Max Opening ICP' ,'Post Op ICP', 'Post Op Initial ICP', 'Post Op Final ICP', 'Post Op Max Opening ICP');
  xlabel('X axis [mm]');
  zlabel('Z axis [mm]');
+ xlim([-5 10])
  title('Lower mid incisor path (Frontal View)');
  
 saveas(gcf,strcat(outputfilename, '\FrontalView.pdf'));
@@ -120,4 +136,7 @@ figure;
  ylabel('Y axis [mm]');
  zlabel('Z axis [mm]');
  title('Lower mid incisor path (Tansverse View)');
- saveas(gcf,strcat(outputfilename,'/TransverseView.pdf'));
+ saveas(gcf,strcat(outputfilename,'/TransverseView.pdf')); 
+
+save('preOpICP.txt','preOpICP','-ascii');
+save('postOpICP.txt','postOpICP','-ascii');
