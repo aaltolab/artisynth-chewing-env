@@ -57,6 +57,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     % Check incisor path deviation is less that 1mm
     forwICP = ah.getOprobeData('incisor_position');
     forwICV = ah.getOprobeData('incisor_velocity');
-    forwExcitations = ah.getOprobeData('excitations');
+    tempExcitations = ah.getOprobeData('excitations');
+    forwExcitations = tempExcitations(:,2:25);
     ah.quit();
 end

@@ -1,6 +1,15 @@
-function [perturbedExcitMsOut,pertShapeMagnitutdes] = performexcitationanalysis(window,excitMs,pertshape,muscles,pertModelType)
-    %performexcitationanalysis Summary of this function goes here
-    %   Detailed explanation goes here
+function [perturbedExcitMsOut,pertShapeMagnitutdes] = excitationperturbation(window,excitMs,pertShape,muscles,pertModelType)
+   % SUMMARY:
+   % window         = the time period that the perturbation is applied to
+   % excitMs        = the muscle excitations to be perturbed 
+   % pertShape      = the shape function of the perturbation (step, ramp)
+   % muscles        = struct of the muscle signals to be perturbed
+   % pertModelType  = the type of model to apply to the perturbation.
+   %                  It can be additive or multiplicative.
+   % This function selects the window of time for the excitations signals
+   % and applies a small random perturbation to that signal. The random
+   % perturbation is generated with matlabs random function algorithms. However,
+   % the selection for the algorithm changes every time that this function is called.
 
     % Set all negative values in smoothed matrices to 0
     rng('shuffle');
@@ -21,7 +30,7 @@ function [perturbedExcitMsOut,pertShapeMagnitutdes] = performexcitationanalysis(
     pertShapeMagnitutdes = zeros(1,length(muscleIds));
 
     for i = 1:length(muscleIds)
-        randPert = normrnd(mu,sigma)*pertshape;
+        randPert = normrnd(mu,sigma)*pertShape;
         if (additive == 1)
             perturbedExcitMs(window(:,1),muscleIds(i)) = ...
                 excitMs(window(:,1),muscleIds(i)) + randPert;

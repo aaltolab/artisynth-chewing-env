@@ -1,4 +1,4 @@
-function [] = ...
+function [figH] = ...
     plotExcitations(t,excitM,muscles,icp,outputFileName,groupName,randPertExcit,pertWindow)
     % SUMMARY: 
     % This function accepts all of the required parameters 
@@ -24,7 +24,7 @@ function [] = ...
     yMax = 0.125;
 
     muscleIds = cell2mat({muscles.id});
-    muscleLabels = string({muscles.name});
+    muscleLabels = {muscles.name};
     excit = excitM(:,muscleIds);
     [maxNum maxIndex] = min(icp(:,4));
     tMaxOpen = icp(maxIndex,1);
@@ -35,7 +35,7 @@ function [] = ...
         windowDur = strcat(num2str((tf-t0)*1000)," ms");
 
         pertExcit = randPertExcit(:,muscleIds);
-        figure;
+        figH = figure;
         title(groupName);    
         for j = 1:length(muscleIds)
             subplot(length(muscleIds),1,j)
@@ -62,7 +62,6 @@ function [] = ...
         end
         saveas(gcf,strcat(outputFileName, '/ExcitationExample.png'));
     else
-        mkdir(strcat(outputFileName,'\Excitation Plots'));
         h = figure('Visible','Off');
         for iFig = 1:length(muscleIds)
             figH(iFig) = plot(t,excit(:,iFig),'LineWidth',1.2);
@@ -75,13 +74,12 @@ function [] = ...
         else
             ylim([yMin yMax]);    
         end
-
         xlabel('Time [s]'); 
         ylabel('Excitation [%]');
-        legend([marker, figH],{'Jaw max opening',muscles{2,:}});
-        vline([t0 tf],{'k','k'}, {'',strcat(windowDur," Perturbation")});
+        legend([marker, figH],{"Jaw max opening",muscleLabels{:,:}});
+%         vline([t0 tf],{'k','k'}, {'',strcat(windowDur," Perturbation")});
         title(groupName);    
-        saveas(h,strcat(outputFilename,'\Excitation Plots',groupName,'.pdf'));
+        saveas(h,strcat(outputFileName,'/',groupName,'.fig'));
     end
 end
 

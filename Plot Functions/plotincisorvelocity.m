@@ -1,4 +1,4 @@
-function [] = plotIncisorVelocity(incisorVelMs)
+function [] = plotincisorvelocity(incisorVelMs)
 %PLOTEXCITATIONS Summary of this function goes here
 %   Detailed explanation goes here
 

@@ -1,4 +1,4 @@
-function [] = plotIncisorPosition(incisorPosMs)
+function [] = plotincisorposition(incisorPosMs)
 %PLOTEXCITATIONS Summary of this function goes here
 %   Detailed explanation goes here
 
