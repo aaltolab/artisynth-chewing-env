@@ -20,20 +20,16 @@ close all;
 rng('shuffle');
 
 %-------------------------MUSCLE DEFINITIONS------------------------------
-muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
-           'lat','rat','lmt','rmt','lpt','rpt','lsm','rsm','ldm','rdm',...
-           'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
-           'lpm','rpm','lgh','rgh'};
-       
-deactivatemuscles = muscles(:,[15 16]);
+muscles = createmusclestruct('musclekey.txt');     
+deactivateMuscles = muscles([15 16]);
        
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables
-simTime = 0.5; %s
+simDur = 0.5; %s
 simTimeStep =  0.005; %s
 fs = 1/simTimeStep; % Hz 200 from tracker and 1000 from emg
 % time step; 
-numSim = 5;
+numSim = 2;
 t0PertWindow = [0:0.05:0.45]; %s
 tfPertWindow = [0.05:0.05:0.5]; %s
 pertModelType = ["additive", "multiplicative"];
@@ -48,16 +44,10 @@ forwardModelName = ...
 %-------------------------------INVERSES-----------------------------------
 %Load, run, and extract Inverse simulation data
 % Inverse Simulation
-[invExcitations,invICP,invICV] = ...
-    inverseSim(simTime,invModelName);
+[invExcitations,invICP,invICV] = inversesim(simDur,invModelName);
 
 %------------------------SMOOTH EXCITATION SIGNAL--------------------------
-smoothExcitations = zeros(size(invExcitations));
-smoothExcitations(:,1) = invExcitations(:,1);
-
-for i = 2:size(invExcitations,2)
-     smoothExcitations(:,i) = smoothdata(invExcitations(:,i));
-end
+smoothExcitations = smoothexcitationsignal(invExcitations(:,2:25));
 
 for w = 1:length(t0PertWindow)
     outputfilename = strcat('Output Data_', datestr(now,'mmmm_dd_yyyy_HH_MM_'),num2str(w));
@@ -65,33 +55,19 @@ for w = 1:length(t0PertWindow)
 
     %------------------------PERTUBATION WINDOW GEN----------------------------
     % Create local pertubation window and shape function
-    window = createLocalPertWindow(invExcitations,t0PertWindow(w),tfPertWindow(w),fs);
+    window = createlocalpertwindow(simDur,t0PertWindow(w),tfPertWindow(w),fs);
 
     % Create local pertubation shape function
-    openPertShape = createPertShape(pertShapeType(1),window);
-
-    if(w == 1)
-        %----------------------PLOT AND SAVE RAW EXCITATIONS-----------------------
-        % %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-        plotExcitations(invExcitations,0, muscles(:, [17 18 19 20 21 22 23 24]),'InvHyoids-Digastrics',outputfilename,window,invICP);
-        
-        % Pterygoids [3 14 3 15 12 24]
-        plotExcitations(invExcitations,0, muscles(:, [11 12 13 14 15 16]),'InvPterygoids',outputfilename,window,invICP);
-        
-        % Temperols [6 18 7 19 9 21]
-        plotExcitations(invExcitations,0, muscles(:, [1 2 3 4 5 6]),'InvTemperols',outputfilename,window,invICP);
-        
-        % Masseters [10 22 11 23]
-        plotExcitations(invExcitations,0, muscles(:, [7 8 9 10]),'InvMasseters',outputfilename,window,invICP);
-    end
+    openPertShape = createpertshape(pertShapeType(1),window);
 
     %------------------------------FORWARDSIM----------------------------------
     %Load calculated excitations, run forward simulation, and collect position,
     %velocity, and force
 
-    % Forward Simulation
+    % Pertubation Study
     [simulationParamTable, statvarTable] = ...
-         pertStudy(  smoothExcitations...
+         pertstudy(  simDur...
+                     ,smoothExcitations...
                      ,window...
                      ,openPertShape...
                      ,muscles...
@@ -103,6 +79,6 @@ for w = 1:length(t0PertWindow)
                      ,numSim...
                      ,outputfilename...
                     );
-    end
+end
 % Write smooth excitations to excitation probe input files for forward sim.            
 % writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);

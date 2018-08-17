@@ -1,5 +1,5 @@
-function [pertShape] = createPertShape(shape,window)
-%createPertShape
+function [pertShape] = createpertshape(shape,window)
+%createpertshape
 % SUMMARY: This function accepts two paramters shape and window
 %
 % PARAMETERS:

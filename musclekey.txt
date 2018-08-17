@@ -1,32 +1,24 @@
-lat     =  'Left Anterior Temporal';
-rat     =  'Right Anterior Temporal';
-lmt     =  'Left Middle Temporal';
-rmt     =  'Right Middle Temporal';
-lpt     =  'Left Posterior Temporal';
-rpt     =  'Right Posterior Temporal';
-lsm     =  'Left Superficial Masseter';
-rsm     =  'Right Superficial Masseter';
-ldm     =  'Left Deep Masseter';
-rdm     =  'Right Deep Masseter';
-lmp     =  'Left Medial Pterygoid';
-rmp     =  'Right Medial Pterygoid';		
-lsp     =  'Left Superior Lateral Pterygoid';
-rsp     =  'Right Superior Lateral Pterygoid';
-lip     =  'Left Inferior Lateral Pterygoid';
-rip     =  'Right Inferior Lateral Pterygoid';
-lad     =  'Left Anterior Digastric';
-rad     =  'Right Anterior Digastric';
-lam     =  'Left Anterior Mylohyoid';
-ram     =  'Right Anterior Mylohyoid';
-lpm     =  'Left Posterior Mylohyoid';
-rpm     =  'Right Posterior Mylohyoid';
-lgh     =  'Left Geniohyoid';
-rgh     =  'Right Geniohyoid';
-
-----------------Not being used-------------------
-% lpd     =  'Left Posterior Digastric';
-% lsh     =  'Left Stylohyoid';
-% lsth    =  'Left Sternohyoid' ;
-% rpd     =  'Right Posterior Digastric';
-% rsh     =  'Right Stylohyoid';
-% rsteh   =  'Right Sternohyoid';
+1, lat, Left Anterior Temporal
+2, rat, Right Anterior Temporal
+3, lmt, Left Middle Temporal
+4, rmt, Right Middle Temporal
+5, lpt, Left Posterior Temporal
+6, rpt, Right Posterior Temporal
+7, lsm, Left Superficial Masseter
+8, rsm, Right Superficial Masseter
+9, ldm, Left Deep Masseter
+10, rdm, Right Deep Masseter
+11, lmp, Left Medial Pterygoid
+12, rmp, Right Medial Pterygoid		
+13, lsp, Left Superior Lateral Pterygoid
+14, rsp, Right Superior Lateral Pterygoid
+15, lip, Left Inferior Lateral Pterygoid
+16, rip, Right Inferior Lateral Pterygoid
+17, lad, Left Anterior Digastric
+18, rad, Right Anterior Digastric
+19, lam, Left Anterior Mylohyoid
+20, ram, Right Anterior Mylohyoid
+21, lpm, Left Posterior Mylohyoid
+22, rpm, Right Posterior Mylohyoid
+23, lgh, Left Geniohyoid
+24, rgh, Right Geniohyoid

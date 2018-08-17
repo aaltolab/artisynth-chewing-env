@@ -1,7 +1,7 @@
 function [simulationParamTableOut, statvarTableOut] = ...
-    pertStudy(smoothExcitationM,window,pertshape,...
+    pertStudy(simDur,smoothExcitations,window,pertShape,...
 			   muscles,pertModelType,forwardModelName,...
-			   invModelName,pertShapeType,invICP,numSim,outputfilename);
+			   invModelName,pertShapeType,invICP,numSim,outputFileName);
 %pertStudy 
 % SUMMARY: 
 % This function accepts all of the required paramters 
@@ -33,37 +33,10 @@ function [simulationParamTableOut, statvarTableOut] = ...
 % RETURNS:
 % statvarTableOut 		  =	IV and DV in a table for X simulations
 % simulationParamTableOut = with all of the required parameters to run 
-%							the specific simulation.
+%							the specific simulation.		
 
-%----------------------FULL MUSCLE NAMES FOR IPROBES-----------------------
-lat     =  'Left Anterior Temporal';
-rat     =  'Right Anterior Temporal';
-lmt     =  'Left Middle Temporal';
-rmt     =  'Right Middle Temporal';
-lpt     =  'Left Posterior Temporal';
-rpt     =  'Right Posterior Temporal';
-lsm     =  'Left Superficial Masseter';
-rsm     =  'Right Superficial Masseter';
-ldm     =  'Left Deep Masseter';
-rdm     =  'Right Deep Masseter';
-lmp     =  'Left Medial Pterygoid';
-rmp     =  'Right Medial Pterygoid';		
-lsp     =  'Left Superior Lateral Pterygoid';
-rsp     =  'Right Superior Lateral Pterygoid';
-lip     =  'Left Inferior Lateral Pterygoid';
-rip     =  'Right Inferior Lateral Pterygoid';
-lad     =  'Left Anterior Digastric';
-rad     =  'Right Anterior Digastric';
-lam     =  'Left Mylohyoid';
-ram     =  'Right Mylohyoid';
-lpm     =  'Left Posterior Mylohyoid';
-rpm     =  'Right Posterior Mylohyoid';
-lgh     =  'Left Geniohyoid';
-rgh     =  'Right Geniohyoid';					
-
-smoothExcitations = smoothExcitationM(:,2:25);
-t = smoothExcitationM(:,1,1);
-simTime = max(t);
+dt = round(simDur/size(smoothExcitations,1),1,'significant');
+t = [0:dt:simDur]';
 
 %-------------------------OUTPUT DATA HEADERS------------------------------
 statvarTableCol = {
@@ -171,132 +144,26 @@ simulationParamTable = cell2table(cell(0,length(simulationParamTableCol)), 'Vari
 
 % Run forward simulation with smooth excitations and check that incisor 
 % path error is less than 1mm in x,y, and z.
-
-
-
-ah = artisynth('-noGui','-model',forwardModelName);
-
-ah.setIprobeData (lat  ,horzcat(t,smoothExcitations(:,1)));
-ah.setIprobeData (rat  ,horzcat(t,smoothExcitations(:,2)));
-ah.setIprobeData (lmt  ,horzcat(t,smoothExcitations(:,3)));
-ah.setIprobeData (rmt  ,horzcat(t,smoothExcitations(:,4)));
-ah.setIprobeData (lpt  ,horzcat(t,smoothExcitations(:,5)));
-ah.setIprobeData (rpt  ,horzcat(t,smoothExcitations(:,6)));
-ah.setIprobeData (lsm  ,horzcat(t,smoothExcitations(:,7)));
-ah.setIprobeData (rsm  ,horzcat(t,smoothExcitations(:,8)));
-ah.setIprobeData (ldm  ,horzcat(t,smoothExcitations(:,9)));
-ah.setIprobeData (rdm  ,horzcat(t,smoothExcitations(:,10)));
-ah.setIprobeData (lmp  ,horzcat(t,smoothExcitations(:,11)));
-ah.setIprobeData (rmp  ,horzcat(t,smoothExcitations(:,12)));
-ah.setIprobeData (lsp  ,horzcat(t,smoothExcitations(:,13)));
-ah.setIprobeData (rsp  ,horzcat(t,smoothExcitations(:,14)));
-ah.setIprobeData (lip  ,horzcat(t,smoothExcitations(:,15)));
-ah.setIprobeData (rip  ,horzcat(t,smoothExcitations(:,16)));
-ah.setIprobeData (lad  ,horzcat(t,smoothExcitations(:,17)));
-ah.setIprobeData (rad  ,horzcat(t,smoothExcitations(:,18)));
-ah.setIprobeData (lam  ,horzcat(t,smoothExcitations(:,19)));
-ah.setIprobeData (ram  ,horzcat(t,smoothExcitations(:,20)));
-ah.setIprobeData (lpm  ,horzcat(t,smoothExcitations(:,21)));
-ah.setIprobeData (rpm  ,horzcat(t,smoothExcitations(:,22)));
-ah.setIprobeData (lgh  ,horzcat(t,smoothExcitations(:,23)));
-ah.setIprobeData (rgh  ,horzcat(t,smoothExcitations(:,24))); 
-
-ah.play(simTime);
-ah.waitForStop();
-
-% Check incisor path deviation is less that 1mm
-icpFull = ah.getOprobeData('incisor_position');
-MaxPositionError = max(abs(invICP(:,2:4)-icpFull(:,2:4)));
-
-% No Pertubations
-icvFull = ah.getOprobeData('incisor_velocity');
-icaFull = 0;
+[icpFull,icvFull,excitationsFull] = ...
+	forwardsim(simDur,forwardModelName,smoothExcitations,muscles);
+	
+maxPositionError = max(abs(icpFull(:,2:4)-icpFull(:,2:4)));
 
 %Select position and velocity only within specified pertubation window
-icp = icpFull(21:31,:);
+icp = icpFull(window(:,1),:);
 icv = icvFull(window(:,1),:);
 icv(:,2:4) = icv(:,2:4).*0.001; % Convert mm/s to m/s
 
 %Calculate average acceleration within pertubation window
-averageica = (icv(end,2:4)-icv(1,2:4))/(icv(end,1)-icv(1,1));
-excitationsFull = ah.getOprobeData('excitations');
-save(strcat(outputfilename, '\excitations.mat'),'excitationsFull');
-% mkdir(strcat(outputfilename,'\PreSimPlots\'));
-ah.quit();
-
-% Get Smooth excitation forward plots
-% %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputfilename, window,icpFull);
-
-% Pterygoids [3 14 3 15 12 24]
-plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputfilename, window,icpFull);
-
-% Temperols [6 18 7 19 9 21]
-plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputfilename, window,icpFull);
-
-% Masseters [10 22 11 23]
-plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputfilename, window,icpFull);
+averageICA = (icv(end,2:4)-icv(1,2:4))/(icv(end,1)-icv(1,1));
+save(strcat(outputFileName, '\excitations.mat'),'excitationsFull');
 
 % Perform excitation analysis in window for pre simulation plots
-perturbedExcitations = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
+perturbedExcitations = performexcitationanalysis(window,smoothExcitations,pertShape,muscles,pertModelType);
 
 % Generate pre simulation plots
 [maxNumInv maxIndexInv] = min(invICP(:,4));
 [maxNumForw maxIndexForw] = min(icpFull(:,4));
-% Frontal view on ICP
-figure;
- plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
- view(0,0);
- hold on
- plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
- hold on
- plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
- hold on;
- plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- hold on
- plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
- view(0,0);
- hold on
- plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
- hold on
- plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- hold on
- plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
- xlabel('X axis [mm]');
- zlabel('Z axis [mm]');
- title('Lower mid incisor path (Frontal View)');
- xlim([-0.25 0.25]); 
- saveas(gcf,strcat(outputfilename, '\PreSimPlots', '\FrontalView.png'));
- 
- % Transverse view on ICP
-figure;
- plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
- view(90,0)  % YZ
- hold on
- plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
- hold on
- plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
- hold on
- plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- hold on
- plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
- view(90,0)  % YZ
- hold on
- plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
- hold on
- plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- hold on
- plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
- ylabel('Y axis [mm]');
- zlabel('Z axis [mm]');
- title('Lower mid incisor path (Tansverse View)');
- saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/TransverseView.png'));
-
-% Muscle excitation example
-plotExcitations(smoothExcitationM,perturbedExcitations, muscles(:, [20 21]),0,0,window,icpFull);
-saveas(gcf,strcat(outputfilename, '/PreSimPlots', '/ExcitationExample.png'));
 
 %Estimate completion time and report to dialog
 pertExcitationMagnitudes = zeros(numSim,24);
@@ -315,26 +182,79 @@ elseif(completionTime >= 86400)
     completionTime = (completionTime)/86400;
 end
 	
-
-% Generate dialog to ask user if they want to procceed with know path deviation error
-% question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
-% 	MaxPositionError(1),MaxPositionError(2),MaxPositionError(3),completionTime);
-% answer = questdlg(question,'Warning','Yes','No','No');
-% % Handle response
-% switch answer
-%     case 'Yes'
-% 
-%     case 'No'
-%         simulationParamTableOut = 0;
-%         statvarTableOut = 0;
-%         disp('Pertubation analysis aborted');
-%         return;
-% end
+if(window(1,2) == 0)
+	% Frontal view on ICP
+	figure;
+		plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
+		view(0,0);
+		hold on
+		plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
+		hold on
+		plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
+		hold on;
+		plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+		hold on
+		plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
+		view(0,0);
+		hold on
+		plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
+		hold on
+		plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
+		hold on
+		plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+		legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
+		xlabel('X axis [mm]');
+		zlabel('Z axis [mm]');
+		title('Lower mid incisor path (Frontal View)');
+		xlim([-0.25 0.25]); 
+		saveas(gcf,strcat(outputFileName, '\FrontalView.png'));
+	
+	 % Transverse view on ICP
+	figure;
+		plot3(invICP(:,2),invICP(:,3),invICP(:,4),'LineWidth',1.2);
+		view(90,0)  % YZ
+		hold on
+		plot3(invICP(1,2),invICP(1,3),invICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
+		hold on
+		plot3(invICP(end,2),invICP(end,3),invICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
+		hold on
+		plot3(invICP(maxIndexInv,2),invICP(maxIndexInv,3),maxNumInv,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+		hold on
+		plot3(icpFull(:,2),icpFull(:,3),icpFull(:,4),'LineWidth',1.2);
+		view(90,0)  % YZ
+		hold on
+		plot3(icpFull(1,2),icpFull(1,3),icpFull(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
+		hold on
+		plot3(icpFull(end,2),icpFull(end,3),icpFull(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
+		hold on
+		plot3(icpFull(maxIndexForw,2),icpFull(maxIndexForw,3),maxNumForw,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
+		legend('Inverse ICP', 'Inverse Initial ICP', 'Inverse Final ICP', 'Inv Max Opening ICP' ,'Forward ICP', 'Forward Initial ICP', 'Forward Final ICP', 'Forward Max Opening ICP');
+		ylabel('Y axis [mm]');
+		zlabel('Z axis [mm]');
+		title('Lower mid incisor path (Tansverse View)');
+		saveas(gcf,strcat(outputFileName, '/TransverseView.png'));
+        
+    plotexcitations(t,smoothExcitations,muscles([20 21 22 23]),icpFull,outputFileName,"Excitations",perturbedExcitations,window);
+    
+	% Generate dialog to ask user if they want to procceed with know path deviation error
+	question = sprintf(strcat('The max path deviation is: (%.2f, %.2f, %.2f) [mm] and the estimated completion time is %.2f ',unit,' Would you like to continue?'),...
+		maxPositionError(1),maxPositionError(2),maxPositionError(3),completionTime);
+	answer = questdlg(question,'Warning','Yes','No','No');
+	% Handle response
+	switch answer
+	    case 'Yes'
+		
+	    case 'No'
+	        simulationParamTableOut = 0;
+	        statvarTableOut = 0;
+	        error('Pertubation analysis aborted');
+	end
+end
  
 % Start artisynth for pertubation analysis
 ah = artisynth('-noGui','-model',forwardModelName);
 
-% Fast forward to beginneing of pertubation window
+% Fast forward to beginning of pertubation window
 tElapsed = 0;
 ah.clearWayPoints();
 ah.addBreakPoint(min(window(:,2)));
@@ -344,7 +264,7 @@ if(min(window(:,2)) > 0)
     ah.play();
     ah.waitForStop();
 end
-% 
+
 % display(ah.getTime());
 % Loop small pertubation for x simulations
 % start total time clock
@@ -364,49 +284,29 @@ for i = 1:numSim
 	
 	% Perform small pertubation and load muscle input probes
     [perturbedExcitations,...
-        pertExcitMuscleMags] = performExcitationAnalysis(window,smoothExcitations,pertshape,muscles,pertModelType);
+        pertExcitMuscleMags] = performexcitationanalysis(window,smoothExcitations,pertShape,muscles,pertModelType);
     
     pertMagTable = [pertMagTable;num2cell(pertExcitMuscleMags)];
-    
-    ah.setIprobeData (lat  ,horzcat(t,perturbedExcitations(:,1)));
-	ah.setIprobeData (rat  ,horzcat(t,perturbedExcitations(:,2)));
-	ah.setIprobeData (lmt  ,horzcat(t,perturbedExcitations(:,3)));
-	ah.setIprobeData (rmt  ,horzcat(t,perturbedExcitations(:,4)));
-	ah.setIprobeData (lpt  ,horzcat(t,perturbedExcitations(:,5)));
-	ah.setIprobeData (rpt  ,horzcat(t,perturbedExcitations(:,6)));
-	ah.setIprobeData (lsm  ,horzcat(t,perturbedExcitations(:,7)));
-	ah.setIprobeData (rsm  ,horzcat(t,perturbedExcitations(:,8)));
-	ah.setIprobeData (ldm  ,horzcat(t,perturbedExcitations(:,9)));
-	ah.setIprobeData (rdm  ,horzcat(t,perturbedExcitations(:,10)));
-	ah.setIprobeData (lmp  ,horzcat(t,perturbedExcitations(:,11)));
-	ah.setIprobeData (rmp  ,horzcat(t,perturbedExcitations(:,12)));
-	ah.setIprobeData (lsp  ,horzcat(t,perturbedExcitations(:,13)));
-	ah.setIprobeData (rsp  ,horzcat(t,perturbedExcitations(:,14)));
-	ah.setIprobeData (lip  ,horzcat(t,perturbedExcitations(:,15)));
-	ah.setIprobeData (rip  ,horzcat(t,perturbedExcitations(:,16)));
-	ah.setIprobeData (lad  ,horzcat(t,perturbedExcitations(:,17)));
-	ah.setIprobeData (rad  ,horzcat(t,perturbedExcitations(:,18)));
-	ah.setIprobeData (lam  ,horzcat(t,perturbedExcitations(:,19)));
-	ah.setIprobeData (ram  ,horzcat(t,perturbedExcitations(:,20)));
-	ah.setIprobeData (lpm  ,horzcat(t,perturbedExcitations(:,21)));
-	ah.setIprobeData (rpm  ,horzcat(t,perturbedExcitations(:,22)));
-	ah.setIprobeData (lgh  ,horzcat(t,perturbedExcitations(:,23)));
-	ah.setIprobeData (rgh  ,horzcat(t,perturbedExcitations(:,24)));
+	
+	for m = 1:length(muscles)
+        probeLabel = muscles(m).probeLabel;
+        muscleId = muscles(m).id;
+        ah.setIprobeData (probeLabel, horzcat(t,perturbedExcitations(:,muscleId)));
+	end
     
 	% Run simulation for duration of pertubation window
     ah.play();
     ah.waitForStop();
-%     display(ah.getTime());
 
-    perticp = ah.getOprobeData('incisor_position'); 
-    perticv = ah.getOprobeData('incisor_velocity'); %m/s
+    pertICP = ah.getOprobeData('incisor_position'); 
+    pertICV = ah.getOprobeData('incisor_velocity'); %m/s
     
-    perticp = perticp(window(:,1),:);
-    perticv = perticv(window(:,1),:);
-    perticv(:,2:4) = 0.001.*perticv(:,2:4);
+    pertICP = pertICP(window(:,1),:);
+    pertICV = pertICV(window(:,1),:);
+    pertICV(:,2:4) = 0.001.*pertICV(:,2:4);
  
 	% Calculate Average ICP Acceleration a(t) = (v(tf)-v(t0))/(tf - t0)
-	pertaverageica = (perticv(end,2:4)-perticv(1,2:4))/(perticv(end,1)-perticv(1,1));
+	pertAverageICA = (pertICV(end,2:4)-pertICV(1,2:4))/(pertICV(end,1)-pertICV(1,1));
     
 	% Log all variables from simulation
     Simulation					= i;
@@ -419,24 +319,24 @@ for i = 1:numSim
 	PertModelType				= pertModelType;
     t0Pert     					= min(window(:,2));
     tfPert     					= max(window(:,2));
-    PertWindowICPX     			= perticp(end,2);
-    PertWindowICPY     			= perticp(end,3);
-    PertWindowICPZ     			= perticp(end,4);
-    PertWindowICVX     			= perticv(end,2);
-	PertWindowICVY     			= perticv(end,3);
-	PertWindowICVZ     		    = perticv(end,4);
-	PertWindowICAX     			= pertaverageica(1);
-	PertWindowICAY     			= pertaverageica(2);
-	PertWindowICAZ     			= pertaverageica(3);
+    PertWindowICPX     			= pertICP(end,2);
+    PertWindowICPY     			= pertICP(end,3);
+    PertWindowICPZ     			= pertICP(end,4);
+    PertWindowICVX     			= pertICV(end,2);
+	PertWindowICVY     			= pertICV(end,3);
+	PertWindowICVZ     		    = pertICV(end,4);
+	PertWindowICAX     			= pertAverageICA(1);
+	PertWindowICAY     			= pertAverageICA(2);
+	PertWindowICAZ     			= pertAverageICA(3);
 	WindowICPX     				= icp(end,2);
 	WindowICPY     				= icp(end,3);
 	WindowICPZ     				= icp(end,4);
 	WindowICVX     				= icv(end,2);
 	WindowICVY     				= icv(end,3);
 	WinMaxICVZ     				= icv(end,4);
-	WindowICAX     				= averageica(1);
-	WindowICAY     				= averageica(2);
-	WindowICAZ     				= averageica(3);
+	WindowICAX     				= averageICA(1);
+	WindowICAY     				= averageICA(2);
+	WindowICAZ     				= averageICA(3);
 	ladPertExcit				= pertExcitMuscleMags(1);	   
 	lipPertExcit				= pertExcitMuscleMags(2);	   
 	lspPertExcit				= pertExcitMuscleMags(3);	   
@@ -528,30 +428,30 @@ for i = 1:numSim
 	% Updated estimated simulation completion time 
    tSim = toc;
    tElapsed = toc(tStart);
-   esttime = (tElapsed/i)*(numSim-i); 
+   estTime = (tElapsed/i)*(numSim-i); 
    
    if(i == 1)
         fprintf('Begining pertubation analysis...\nEstimated time to complete = %.2f %s\n'...
         ,completionTime,unit);
     end
     
-    if(esttime <= 60)
+    if(estTime <= 60)
         unit = '[sec]';
-        timeremaining = (tElapsed/i)*(numSim-i);
-    elseif(esttime > 60 && esttime <= 3600)
+        timeRemaining = (tElapsed/i)*(numSim-i);
+    elseif(estTime > 60 && estTime <= 3600)
         unit = '[min]';
-        timeremaining = ((tElapsed/i)*(numSim-i))/60;
-    elseif(esttime > 3600 && esttime < 86400)
+        timeRemaining = ((tElapsed/i)*(numSim-i))/60;
+    elseif(estTime > 3600 && estTime < 86400)
         unit = '[hours]';
-        timeremaining = ((tElapsed/i)*(numSim-i))/3600;
-    elseif(esttime >= 86400)
+        timeRemaining = ((tElapsed/i)*(numSim-i))/3600;
+    elseif(estTime >= 86400)
         unit = '[days]';
-        timeremaining = ((tElapsed/i)*(numSim-i))/86400;
+        timeRemaining = ((tElapsed/i)*(numSim-i))/86400;
     end
     
     % Update waitbar and message
     waitbar(i/numSim,f,sprintf(strcat('Simulation Progress: %.2f%%\nTime remaining = %.2f ', unit),...
-        (i/numSim)*100,timeremaining));
+        (i/numSim)*100,timeRemaining));
     
 	% rewind simulation if we are doing more than 1
 	% else end artisynth session
@@ -563,26 +463,26 @@ for i = 1:numSim
     
     if ~(mod(i,10000))
         if(i == 10000)
-            fid = fopen(strcat(outputfilename,"/statvarTable.txt"),"wt");
+            fid = fopen(strcat(outputFileName,"/statvarTable.txt"),"wt");
             statvarheader = strings(size(statvarTableCol));
             [statvarheader{:}] = statvarTableCol{:};
             fprintf(fid, "%s,",statvarheader{1:end-1});
             fprintf(fid, "%s\n",statvarheader{end});
-            dlmwrite(strcat(outputfilename,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
+            dlmwrite(strcat(outputFileName,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
             statvarTable(:,:) = [];
             fclose(fid);           
             
-            fid = fopen(strcat(outputfilename,"/pertMagTable.txt"),"wt");
+            fid = fopen(strcat(outputFileName,"/pertMagTable.txt"),"wt");
             pertmagheader = strings(size(pertMagTableCol));
             [pertmagheader{:}] = pertMagTableCol{:};
             fprintf(fid, "%s,",pertmagheader{1:end-1});
             fprintf(fid, "%s\n",pertmagheader{end});
-            dlmwrite(strcat(outputfilename,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
+            dlmwrite(strcat(outputFileName,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
             pertMagTable(:,:) = [];
             fclose(fid);
         else
-           dlmwrite(strcat(outputfilename,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
-           dlmwrite(strcat(outputfilename,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
+           dlmwrite(strcat(outputFileName,'/statvarTable.txt'),table2array(statvarTable),'-append','delimiter',',' ); 
+           dlmwrite(strcat(outputFileName,'/pertMagTable.txt'),table2array(pertMagTable),'-append','delimiter',',' ); 
            statvarTable(:,:) = [];
            pertMagTable(:,:) = [];
         end
@@ -610,10 +510,10 @@ end
     fprintf(strcat(s,unit));
     
     if (numSim < 10000)
-        writetable(statvarTable,strcat(outputfilename,'/statvarTable.txt'),'Delimiter',',');  
-        writetable(pertMagTable,strcat(outputfilename,'/pertMagTable.txt'),'Delimiter',',');
+        writetable(statvarTable,strcat(outputFileName,'/statvarTable.txt'),'Delimiter',',');  
+        writetable(pertMagTable,strcat(outputFileName,'/pertMagTable.txt'),'Delimiter',',');
     end
-    writetable(simulationParamTable,strcat(outputfilename,'/simulationParamTable.txt'),'Delimiter',',');
+    writetable(simulationParamTable,strcat(outputFileName,'/simulationParamTable.txt'),'Delimiter',',');
     
     % Return key data tables
     simulationParamTableOut = simulationParamTable;

@@ -1,15 +1,15 @@
-function [window] = createLocalPertWindow(compExcitM,t0,t1, fs)
-%createLocalPertWindow
-% SUMMARY: Creates a window where a small pertubation
+function [window] = createlocalpertwindow(simDur,pertt0,pertt1, fs)
+%createlocalpertwindow
+% SUMMARY: Creates a window where a small perturbation
 % will be applied to the forward chewing simulation.
 % 
 % This function uses the computed muscles excitations (compExcitM),
-% intial time (t0), final time (t1), and the sampling frequency (fs)
+% initial time (t0), final time (t1), and the sampling frequency (fs)
 % to generate a window where the first column is the row number of the
 % computed excitations and then second column is the correlating time
 % interval.
 %
-% EXAMPLE OUTPUT: createLocalPertWindow(comptExcitM,0,0.05,100)
+% EXAMPLE OUTPUT: createlocalpertwindow(comptExcitM,0,0.05,100)
 %
 %	window = 1			2
 %   		 1			0.01
@@ -19,14 +19,10 @@ function [window] = createLocalPertWindow(compExcitM,t0,t1, fs)
 %   		 5			0.05
 
 	dt=1/fs;
-	temp=zeros(size((t0:dt:t1)'));
-	horzcat(temp, (t0:dt:t1)');
-
-	window = horzcat(temp, (t0:dt:t1)');
-	first = find(compExcitM(:,1)<=t0,1,'last');
-
-	for j = 1:length(window(:,1))
-		window(j,1) = first;
-		first = first + 1;
-    end 
+	t = [0:dt:simDur;];
+	temp = [1:1:length(t);t]';
+	first = find(temp(:,2)<=pertt0,1,'last');
+	last  = find(temp(:,2)<=pertt1,1,'last');
+	
+	window = temp(first:last,:);
 end

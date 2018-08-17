@@ -138,5 +138,18 @@ figure;
  title('Lower mid incisor path (Tansverse View)');
  saveas(gcf,strcat(outputfilename,'/TransverseView.pdf')); 
 
+ % Get Smooth excitation forward plots
+% %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
+% plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputFileName, window,icpFull);
+
+% Pterygoids [3 14 3 15 12 24]
+% plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputFileName, window,icpFull);
+
+% Temperols [6 18 7 19 9 21]
+% plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputFileName, window,icpFull);
+
+% Masseters [10 22 11 23]
+% plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputFileName, window,icpFull);
+
 save('preOpICP.txt','preOpICP','-ascii');
 save('postOpICP.txt','postOpICP','-ascii');

@@ -1,25 +1,22 @@
 function [collectedExcitions,collectedIncisorPath,... 
-	collectedIncisorVelocity] = inverseSim(simTime,invModelName,muscles)
-%PERTSHAPE Summary of this function goes here
-%   This function accepts two paramters shape and window
-%   shape  = the shape of the pertubation (triangle or  heaviside)
-%   window = a vector of the start (t0) and end (t1) of the the window
-%   based on the specificed shape the function then returns a normalized
-%   vector pertShape
-%   muscles = The muscles that are to be deactivated for an inverse sim
+	collectedIncisorVelocity] = inversesim(simDur,invModelName,musclesDeactivated)
+%INVERSESIM Summary of this function goes here
+%   simDur  = the duration of the simulation
+%	invModelName = the java path of the class to be instantiated within artisynth
+%   musclesDeactivated = The muscles that are to be deactivated for an inverse sim
 
 	ah = artisynth('-noGui','-disableHybridSolves','-model',invModelName);
 
 	if exist('muscles','var')
-		muscleids = cell2mat(muscles(1,:));
-		musclelabels = string(muscles(2,:));
+		muscleIds = cell2mat(musclesDeactivated(1,:));
+		muscleLabels = string(musclesDeactivated(2,:));
 
-		for m = 1:length(muscleids)
-			ah.find(strcat('models/jawmodel/axialSprings/',musclelabels(m))).setEnabled(false);
+		for m = 1:length(muscleIds)
+			ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);
 		end
 	end
 
-	ah.play(simTime);
+	ah.play(simDur);
 	ah.waitForStop();
 	
     % save excitation data to matrix
