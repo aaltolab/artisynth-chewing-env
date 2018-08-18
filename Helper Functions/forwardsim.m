@@ -44,7 +44,7 @@ function [forwICP, forwICV,forwExcitations] = ...
 
     if exist('musclesToDeactivate','var')
 		muscleIds = {muscles.id};
-        muscleLabels = string(muscles.name);
+        muscleLabels = {muscles.name};
         
         for m = 1:length(muscleIds)
             ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);

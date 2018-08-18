@@ -10,8 +10,6 @@ simDur  = 0.5;
 dt = 0.005;
 t = [0:dt:simDur];
 
-outputFileName = strcat('Excitation Plots');
-mkdir(outputFileName);
 %-------------------------MUSCLE DEFINITIONS------------------------------  
 muscles = createmusclestruct('musclekey.txt'); 
  
@@ -23,151 +21,140 @@ digastrics = muscles([17:18]);
 mylohyoid  = muscles([19:22]);
 geniohyoid = muscles([23:24]);
 
+% Muscle Groups to be deactivated
+leftsidecorprocess = muscles(:,[3 5]);
+rightsidecorprocess = muscles(:,[4 6]);
+bothcorprocess = muscles(:,[3 4 5 6]);
+leftpterygoids = muscles(:,[11 13 15]);
+righttpterygoids = muscles(:,[12 14 16]);
+allpterygoids = muscles(:,[11 12 13 14 15 16]);
+leftsubmentalmuscles = muscles(:,[17 19 21 23]);
+rightsubmentalmuscles = muscles(:,[18 20 22 24]);
+submentalmuscles = muscles(:,[17 18 19 20 21 22 23 24]);
+
+musclesDeactivated = pterygoids;
+muscleDeactivatedDescription = 'Pterygoids Removed';
+
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...
     'artisynth.models.kieran.tmjsurgery.TmjInverseOpenCloseSimulation';
 forwardModelName = ...
     'artisynth.models.kieran.tmjsurgery.ForwardChewing';
 
-%-------------------------------INVERSE SIM-------------------------------
-[invExcitations,invICP,invICV] = inversesim(simDur,invModelName);
+outputFileName = 'Excitation Plots';
+mkdir(outputFileName);
 
-%------------------------SMOOTH EXCITATION SIGNAL--------------------------
-smoothExcitations = smoothexcitationsignal(invExcitations(:,2:25));
-
-%---------------------------PRE OP FORWARD SIM-----------------------------
+%-------------------------------PREOP------------------------------
+[preopInvExcitations,preopiInvICP,preopInvICV] = inversesim(simDur,invModelName);
+preopSmoothExcit = smoothexcitationsignal(preopInvExcitations(:,2:25));
 [preopICP,preopICV,preopExcit] = ...
-	forwardsim(simDur,forwardModelName,smoothExcitations,muscles);
+	forwardsim(simDur,forwardModelName,preopSmoothExcit,muscles);
 
-preTempFigH   = plotexcitations(t,preopExcit,temporals,preopICP,...
-                                outputFileName,"Preop Temporals Excitations");
-
-preMassFigH   = plotexcitations(t,preopExcit,masseters,preopICP,...
-                                outputFileName,"Preop Massetrs Excitations");
-
-prePterFigH   = plotexcitations(t,preopExcit,pterygoids,preopICP,...
-                                outputFileName,"Preop Pterygoids Excitations");
-
-preDigastFigH = plotexcitations(t,preopExcit,digastrics,preopICP,...
-                                outputFileName,"Preop Digastrics Excitations");
-
-preMyloFigH   = plotexcitations(t,preopExcit,mylohyoid,preopICP,...
-                                outputFileName,"Preop Mylohyoid Excitations");
-
-preGenioFigH  = plotexcitations(t,preopExcit,geniohyoid,preopICP,...
-                                outputFileName,"Preop Geniohyoid Excitations");
-
-%---------------------------POST OP FORWARD SIM-----------------------------
+%-------------------------------POSTOP------------------------------
+[postopInvExcitations,postopiInvICP,preopInvICV] = inversesim(simDur,invModelName,musclesDeactivated);
+postopSmoothExcit = smoothexcitationsignal(postopInvExcitations(:,2:25));
 [postopICP,postopICV,postopExcit] = ...
-	forwardsim(simDur,forwardModelName,smoothExcitations,muscles);
+	forwardsim(simDur,forwardModelName,postopSmoothExcit,muscles);
 
-postTempFigH   = plotexcitations(t,postopExcit,temporals,postopICP,...
-                                outputFileName,"Postop Temporals Excitations");
+%---------------------------EXCITATION PLOTS--------------------------------
+%parameters for figure and panel size
+plotheight=20;
+plotwidth=16;
+subplotsx=2;
+subplotsy=6;   
+leftedge=1.2;
+rightedge=0.4;   
+topedge=1;
+bottomedge=1.5;
+spacex=0.2;
+spacey=0.2;
+fontsize=5;    
+sub_pos=subplotpos(plotwidth,plotheight,leftedge,rightedge,bottomedge,topedge,subplotsx,subplotsy,spacex,spacey);
 
-postMassFigH   = plotexcitations(t,postopExcit,masseters,postopICP,...
-                                outputFileName,"Postop Massetrs Excitations");
+%setting the Matlab figure
+f=figure('visible','on')
+clf(f);
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperSize', [plotwidth plotheight]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 plotwidth plotheight]);
 
-postPterFigH   = plotexcitations(t,postopExcit,pterygoids,postopICP,...
-                                outputFileName,"Postop Pterygoids Excitations");
+%loop to create axes
+for i=1:subplotsx
+    for ii=1:subplotsy
 
-postDigastFigH = plotexcitations(t,postopExcit,digastrics,postopICP,...
-                                outputFileName,"Postop Digastrics Excitations");
+    ax=axes('position',sub_pos{i,ii},'XGrid','off','XMinorGrid','off','FontSize',fontsize,'Box','on','Layer','top');
 
-postMyloFigH   = plotexcitations(t,postopExcit,mylohyoid,postopICP,...
-                                outputFileName,"Postop Mylohyoid Excitations");
-
-postGenioFigH  = plotexcitations(t,postopExcit,geniohyoid,postopICP,...
-                                outputFileName,"Postop Geniohyoid Excitations");
-
-%TODO: organize plots into pre and post op left and right
-% Load saved figures
-files = dir(fullfile(outputFileName, '*.fig'));
-names = {files.name};
-figurePaths = cell(1,length(names));
-
-for f = 1:length(names)
-    figurePaths{1,f} = strcat(outputFileName,'/',names{f});
+    if(i == 1 && ii == 1)
+        plotexcitations(t,preopExcit,temporals,preopICP, outputFileName,'Preop Temporals Excitations');
+    end
+    if(i == 2 && ii == 1)
+        plotexcitations(t,postopExcit,temporals,postopICP,outputFileName,'Postop Temporals Excitations');
+    end
+    if(i == 1 && ii == 2)
+        plotexcitations(t,preopExcit,masseters,preopICP, outputFileName,'Preop Masseters Excitations');
+    end
+    if(i == 2 && ii == 2)
+        plotexcitations(t,postopExcit,masseters,postopICP,outputFileName,'Postop Masseters Excitations');
+    end
+        if(i == 1 && ii == 3)
+        plotexcitations(t,preopExcit,pterygoids,preopICP, outputFileName,'Preop Pterygoids Excitations');
+    end
+    if(i == 2 && ii == 3)
+        plotexcitations(t,postopExcit,pterygoids,postopICP,outputFileName,'Postop Pterygoids Excitations');
+    end
+    if(i == 1 && ii == 4)
+        plotexcitations(t,preopExcit,digastrics,preopICP, outputFileName,'Preop Digastrics Excitations');
+    end
+    if(i == 2 && ii == 4)
+        plotexcitations(t,postopExcit,digastrics,postopICP,outputFileName,'Postop Digastrics Excitations');
+    end
+    if(i == 1 && ii == 5)
+        plotexcitations(t,preopExcit,mylohyoid,preopICP, outputFileName,'Preop Mylohyoid Excitations');
+    end
+    if(i == 2 && ii == 5)
+        plotexcitations(t,postopExcit,mylohyoid,postopICP,outputFileName,'Postop Mylohyoid Excitations');
+    end
+    if(i == 1 && ii == 6)
+        plotexcitations(t,preopExcit,geniohyoid,preopICP, outputFileName,'Preop Geniohyoid Excitations');
+    end
+    if(i == 2 && ii == 6)
+        plotexcitations(t,postopExcit,geniohyoid,postopICP,outputFileName,'Postop Geniohyoid Excitations');
 end
 
-% Load saved figures
-% c=hgload('MyFirstFigure.fig');
-
-% Prepare subplots
-figure
-for iPlot = 1:12
-    h(iPlot)  = subplot(12,2,iPlot);
+    if ii==subplotsy
+        if (i == 1)
+            title('Pre Op Muscle Excitations');
+        elseif (i == 2)
+            title(['Post Op Muscle Excitations','(',muscleDeactivatedDescription,')']);
 end
-% props = {'Name','CurrentAxis'};
-for ihandle = 1:12
-    figHandle = hgload(figurePaths{1,ihandle});
-    legendHandle = findobj(allchild(figHandle),'Tag','legend');
-    axesHandle = findall(figHandle, 'type', 'axes');
-    copyobj(allchild(get(figHandle,'CurrentAxes')),h(ihandle));
-    l(ihandle) = legend(h(ihandle),get(legendHandle,'String'));
-    t(ihandle) = title(h(ihandle),axesHandle.Title.String);
-    yLab(ihandle) = ylabel(h(ihandle),axesHandle.YLabel.String);
-    xLab(ihandle) = xlabel(h(ihandle),axesHandle.XLabel.String);
-    ylim(h(ihandle),axesHandle.YLim);
 end
 
-% figure
-% subplot(6,2,1);
-%     plotexcitations(t,preopExcit,temporals,preopICP,...
-%                     outputFileName,"Preop Temporals Excitations");
-% subplot(6,2,2);
-%     plotexcitations(t,preopExcit,masseters,preopICP,...
-%                     outputFileName,"Preop Massetrs Excitations");
-% subplot(6,2,3);
-%     plotexcitations(t,preopExcit,pterygoids,preopICP,...
-%                     outputFileName,"Preop Pterygoids Excitations");
-% subplot(6,2,4);
-%     plotexcitations(t,preopExcit,digastrics,preopICP,...
-%                     outputFileName,"Preop Digastrics Excitations");
-% subplot(6,2,5);
-%     plotexcitations(t,preopExcit,mylohyoid,preopICP,...
-%                     outputFileName,"Preop Mylohyoid Excitations");
-% subplot(6,2,6);
-%     plotexcitations(t,preopExcit,geniohyoid,preopICP,...
-%                 outputFileName,"Preop Geniohyoid Excitations");
+    if ii>1
+    set(ax,'xticklabel',[])
+    end
 
+    if i>1
+    set(ax,'yticklabel',[])
+    end
 
-% Paste figures on the subplots
-% copyobj(allchild(get(preTempFigH   )),h(1));
-% copyobj(allchild(get(postTempFigH  )),h(2));
-% copyobj(allchild(get(preMassFigH   )),h(3));
-% copyobj(allchild(get(postMassFigH  )),h(4));
-% copyobj(allchild(get(prePterFigH   )),h(5));
-% copyobj(allchild(get(postPterFigH  )),h(6));
-% copyobj(allchild(get(preDigastFigH )),h(7));
-% copyobj(allchild(get(postDigastFigH)),h(8));
-% copyobj(allchild(get(preMyloFigH   )),h(9));
-% copyobj(allchild(get(postMyloFigH  )),h(10));
-% copyobj(allchild(get(preGenioFigH  )),h(11));
-% copyobj(allchild(get(postGenioFigH )),h(12));
+    if i==1
+    ylabel('Excitation [%]')
+    end
 
-% Paste figures on the subplots
-% copyobj(allchild(get(preTempFigH   )),h(1));
-% copyobj(allchild(get(postTempFigH  )),h(2));
-% copyobj(allchild(get(preMassFigH   )),h(3));
-% copyobj(allchild(get(postMassFigH  )),h(4));
-% copyobj(allchild(get(prePterFigH   )),h(5));
-% copyobj(allchild(get(postPterFigH  )),h(6));
-% copyobj(allchild(get(preDigastFigH )),h(7));
-% copyobj(allchild(get(postDigastFigH)),h(8));
-% copyobj(allchild(get(preMyloFigH   )),h(9));
-% copyobj(allchild(get(postMyloFigH  )),h(10));
-% copyobj(allchild(get(preGenioFigH  )),h(11));
-% copyobj(allchild(get(postGenioFigH )),h(12));
+    if ii==1
+    xlabel(['Time [s]'])
+    end
 
+    end
+end
 
+%Saving eps with matlab and then producing pdf and png with system commands
+%If using windows or mac you need to download the MikTex commandline tool.
+%https://miktex.org/download
 
-
-
-
-
-
-
-
-
-
+fileName=['Excitations'];
+print(gcf, '-depsc2','-loose',[outputFileName,'/',fileName,'.eps']);
+system(['epstopdf ',outputFileName,'/',fileName,'.eps'])
+system(['convert -density 300 ',outputFileName,'/',fileName,'.eps',outputFileName,'/',fileName,'.png'])
 

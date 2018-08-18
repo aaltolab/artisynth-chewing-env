@@ -7,9 +7,11 @@ function [collectedExcitions,collectedIncisorPath,...
 
 	ah = artisynth('-noGui','-disableHybridSolves','-model',invModelName);
 
-	if exist('muscles','var')
-		muscleIds = cell2mat(musclesDeactivated(1,:));
-		muscleLabels = string(musclesDeactivated(2,:));
+	if exist('musclesDeactivated','var')
+% 		muscleIds = cell2mat(musclesDeactivated(1,:));
+% 		muscleLabels = string(musclesDeactivated(2,:));
+		muscleIds = {musclesDeactivated.id};
+        muscleLabels = {musclesDeactivated.name};
 
 		for m = 1:length(muscleIds)
 			ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);

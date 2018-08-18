@@ -19,13 +19,22 @@ clear;
 close all;
 rng('shuffle');
 
-%-------------------------MUSCLE DEFINITIONS------------------------------
-muscles = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24;...
-           'lat','rat','lmt','rmt','lpt','rpt','lsm','rsm','ldm','rdm',...
-           'lmp','rmp','lsp','rsp','lip','rip','lad','rad','lam','ram',...
-           'lpm','rpm','lgh','rgh'};
+%-------------------------SCRIPT DEFINITIONS------------------------------  
+simDur  = 0.5;
+dt = 0.005;
+t = [0:dt:simDur];
 
-%-------------------------MUSCLE DEACTIVE CASES----------------------------
+%-------------------------MUSCLE DEFINITIONS------------------------------  
+muscles = createmusclestruct('musclekey.txt'); 
+% Muscle Groups
+temporals  = muscles([1:6]);
+masseters  = muscles([7:8]);
+pterygoids = muscles([11:16]);
+digastrics = muscles([17:18]);
+mylohyoid  = muscles([19:22]);
+geniohyoid = muscles([23:24]);
+
+% Muscle Groups to be deactivated
 leftsidecorprocess = muscles(:,[3 5]);
 rightsidecorprocess = muscles(:,[4 6]);
 bothcorprocess = muscles(:,[3 4 5 6]);
@@ -36,7 +45,8 @@ leftsubmentalmuscles = muscles(:,[17 19 21 23]);
 rightsubmentalmuscles = muscles(:,[18 20 22 24]);
 submentalmuscles = muscles(:,[17 18 19 20 21 22 23 24]);
 
-deactivatedmuscles = leftpterygoids;
+musclesDeactivated = pterygoids;
+muscleDeactivatedDescription = 'Pterygoids Removed';
 
 
 invModelName = ...
@@ -44,112 +54,102 @@ invModelName = ...
 forwardModelName = ...
     'artisynth.models.kieran.tmjsurgery.ForwardChewing';
 
-outputfilename = strcat('comp_forward_leftpterygoids', datestr(now,'mmmm_dd_yyyy_HH_MM'));
+outputfilename = strcat('Trajectory Plots');
 mkdir(outputfilename);
 
-simTime = 0.5; %s
+%-------------------------------PREOP------------------------------
+[preopInvExcitations,preopiInvICP,preopInvICV] = inversesim(simDur,invModelName);
+preopSmoothExcit = smoothexcitationsignal(preopInvExcitations(:,2:25));
+[preopICP,preopICV,preopExcit] = ...
+	forwardsim(simDur,forwardModelName,preopSmoothExcit,muscles);
 
-%-----------------------------INVERSE SIM----------------------------------
-%Load, run, and extract Inverse simulation data
-% Inverse Simulation
-[trackingExcitations,trackingICP,trackingICV] = ...
-    inverseSim(simTime,invModelName);
-
-%-----------------------------SMOOTH EXCIT----------------------------------
-smoothExcitations = zeros(size(trackingExcitations));
-smoothExcitations(:,1) = trackingExcitations(:,1);
-
-for i = 2:size(trackingExcitations,2)
-     smoothExcitations(:,i) = smoothdata(trackingExcitations(:,i));
-end
-% writeToExcitFiles("C:\Users\kieran\develop\artisynth\artisynth_projects\src\artisynth\models\kieran\tmjsurgery\data",0,0.5,smoothExcitations,muscles);
-%-----------------------------FORWARD PRE-OP-------------------------------
-[preOpICP,preOpICV] = ...
-    forwardSim(simTime,forwardModelName,smoothExcitations);
-
-%-----------------------------FORWARD SIM----------------------------------
-[compExcit,compICP,compICV] = ...
-    inverseSim(simTime,invModelName,deactivatedmuscles);
-
-smoothCompExcitations = zeros(size(compExcit));
-smoothCompExcitations(:,1) = compExcit(:,1);
-
-for i = 2:size(compExcit,2)
-     smoothCompExcitations(:,i) = smoothdata(compExcit(:,i));
-end
-
-% Remove muscle at left proccess
-[postOpICP,postOpICV] = ...
-    forwardSim(simTime,forwardModelName,smoothCompExcitations);
+%-------------------------------POSTOP------------------------------
+[postopInvExcitations,postopiInvICP,preopInvICV] = inversesim(simDur,invModelName,musclesDeactivated);
+postopSmoothExcit = smoothexcitationsignal(postopInvExcitations(:,2:25));
+[postopICP,postopICV,postopExcit] = ...
+	forwardsim(simDur,forwardModelName,postopSmoothExcit,muscles);
 
 %-----------------------------INCISOR PLOTS---------------------------------
-% Generate pre simulation plots
-[maxNumPreOp, maxIndexPreop] = min(preOpICP(:,4));
-[maxNumPostOp, maxIndexPostOp] = min(postOpICP(:,4));
-% Frontal view on ICP
-figure;
- plot3(preOpICP(:,2),preOpICP(:,3),preOpICP(:,4),'LineWidth',1.2);
- view(0,0);
- hold on
- plot3(preOpICP(1,2),preOpICP(1,3),preOpICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
- hold on
- plot3(preOpICP(end,2),preOpICP(end,3),preOpICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
- hold on;
- plot3(preOpICP(maxIndexPreop,2),preOpICP(maxIndexPreop,3),maxNumPreOp,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- hold on
- plot3(postOpICP(:,2),postOpICP(:,3),postOpICP(:,4),'LineWidth',1.2);
- view(0,0);
- hold on
- plot3(postOpICP(1,2),postOpICP(1,3),postOpICP(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
- hold on
- plot3(postOpICP(end,2),postOpICP(end,3),postOpICP(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- hold on
- plot3(postOpICP(maxIndexPostOp,2),postOpICP(maxIndexPostOp,3),maxNumPostOp,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- legend('Pre Op ICP', 'Pre Op  Initial ICP', 'Pre Op  Final ICP', 'Pre Op Max Opening ICP' ,'Post Op ICP', 'Post Op Initial ICP', 'Post Op Final ICP', 'Post Op Max Opening ICP');
- xlabel('X axis [mm]');
- zlabel('Z axis [mm]');
- xlim([-5 10])
- title('Lower mid incisor path (Frontal View)');
- 
-saveas(gcf,strcat(outputfilename, '\FrontalView.pdf'));
- 
- % Transverse view on ICP
-figure;
- plot3(preOpICP(:,2),preOpICP(:,3),preOpICP(:,4),'LineWidth',1.2);
- view(90,0)  % YZ
- hold on
- plot3(preOpICP(1,2),preOpICP(1,3),preOpICP(1,4),'bo','MarkerSize', 5, 'MarkerFaceColor', 'b')
- hold on
- plot3(preOpICP(end,2),preOpICP(end,3),preOpICP(end,4),'mv','MarkerSize', 5, 'MarkerFaceColor', 'm')
- hold on
- plot3(preOpICP(maxIndexPreop,2),preOpICP(maxIndexPreop,3),maxNumPreOp,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- hold on
- plot3(postOpICP(:,2),postOpICP(:,3),postOpICP(:,4),'LineWidth',1.2);
- view(90,0)  % YZ
- hold on
- plot3(postOpICP(1,2),postOpICP(1,3),postOpICP(1,4),'ro','MarkerSize', 5, 'MarkerFaceColor', 'r')
- hold on
- plot3(postOpICP(end,2),postOpICP(end,3),postOpICP(end,4),'kv','MarkerSize', 5, 'MarkerFaceColor', 'k')
- hold on
- plot3(postOpICP(maxIndexPostOp,2),postOpICP(maxIndexPostOp,3),maxNumPostOp,'mx','MarkerSize', 10, 'MarkerFaceColor', 'm')
- legend('Pre Op  ICP', 'Pre Op  Initial ICP', 'Pre Op  Final ICP', 'Pre Op Max Opening ICP' ,'Post Op ICP', 'Post Op Initial ICP', 'Post Op Final ICP', 'Post Op Max Opening ICP');
- ylabel('Y axis [mm]');
- zlabel('Z axis [mm]');
- title('Lower mid incisor path (Tansverse View)');
- saveas(gcf,strcat(outputfilename,'/TransverseView.pdf')); 
+%parameters for figure and panel size
+plotheight=20;
+plotwidth=16;
+subplotsx=2;
+subplotsy=6;   
+leftedge=1.2;
+rightedge=0.4;   
+topedge=1;
+bottomedge=1.5;
+spacex=0.2;
+spacey=0.2;
+fontsize=5;    
+sub_pos=subplotpos(plotwidth,plotheight,leftedge,rightedge,bottomedge,topedge,subplotsx,subplotsy,spacex,spacey);
 
- % Get Smooth excitation forward plots
-% %Mylohyiod [4 16 ], digastric [1 13], and geniohyoid [5 17]
-% plotExcitations(smoothExcitationM,0, muscles(:, [17 18 19 20 21 22 23 24]),'ForwHyoids-Digastrics',outputFileName, window,icpFull);
+%setting the Matlab figure
+f=figure('visible','on')
+clf(f);
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperSize', [plotwidth plotheight]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 plotwidth plotheight]);
 
-% Pterygoids [3 14 3 15 12 24]
-% plotExcitations(smoothExcitationM,0, muscles(:, [11 12 13 14 15 16]),'ForwPterygoids',outputFileName, window,icpFull);
+%TODO: generate plots from incisor path
+%TODO: run first case
+%loop to create axes
+for i=1:subplotsx
+    for ii=1:subplotsy
 
-% Temperols [6 18 7 19 9 21]
-% plotExcitations(smoothExcitationM,0, muscles(:, [1 2 3 4 5 6]),'ForwTemperols',outputFileName, window,icpFull);
+    ax=axes('position',sub_pos{i,ii},'XGrid','off','XMinorGrid','off','FontSize',fontsize,'Box','on','Layer','top');
 
-% Masseters [10 22 11 23]
-% plotExcitations(smoothExcitationM,0, muscles(:, [7 8 9 10]),'ForwMasseters',outputFileName, window,icpFull);
+    if(i == 1 && ii == 1)
+        plotincisorposition(goalICP,postopICPForw,[0,0])
+    end
+    if(i == 2 && ii == 1)
+        plotincisorposition(goalICP,postopICPForw,[90,0])
+    end
+    if(i == 1 && ii == 2)
+        plotincisorposition(preopICPInv,postopICPInv,[0,0])
+    end
+    if(i == 2 && ii == 2)
+        plotincisorposition(preopICPInv,postopICPInv,[90,0])
+    end
+    if(i == 1 && ii == 3)
+        plotincisorposition(goalICP,postopForwICPRecov,[0,0])
+    end
+    if(i == 2 && ii == 3)
+        plotincisorposition(goalICP,postopForwICPRecov,[90,0])
+    end
+    if ii==subplotsy
+        if (i == 1)
+            title('Frontal View');
+        elseif (i == 2)
+            title('Transverse View');
+end
+end
 
-save('preOpICP.txt','preOpICP','-ascii');
-save('postOpICP.txt','postOpICP','-ascii');
+    if ii>1
+    set(ax,'xticklabel',[])
+    end
+
+    if i>1
+    set(ax,'yticklabel',[])
+    end
+
+    if i==1
+    ylabel('Position [mm]')
+    end
+
+    if ii==1
+    xlabel(['Position [mm]'])
+    end
+
+    end
+end
+
+%Saving eps with matlab and then producing pdf and png with system commands
+%If using windows or mac you need to download the MikTex commandline tool.
+%https://miktex.org/download
+
+fileName=['ICPcases'];
+print(gcf, '-depsc2','-loose',[outputFileName,'/',fileName,'.eps']);
+system(['epstopdf ',outputFileName,'/',fileName,'.eps'])
+system(['convert -density 300 ',outputFileName,'/',fileName,'.eps',outputFileName,'/',fileName,'.png'])

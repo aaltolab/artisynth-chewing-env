@@ -62,7 +62,7 @@ function [figH] = ...
         end
         saveas(gcf,strcat(outputFileName, '/ExcitationExample.png'));
     else
-        h = figure('Visible','Off');
+        % h = figure('Visible','Off');
         for iFig = 1:length(muscleIds)
             figH(iFig) = plot(t,excit(:,iFig),'LineWidth',1.2);
             hold on
@@ -74,12 +74,14 @@ function [figH] = ...
         else
             ylim([yMin yMax]);    
         end
-        xlabel('Time [s]'); 
-        ylabel('Excitation [%]');
-        legend([marker, figH],{"Jaw max opening",muscleLabels{:,:}});
+%         xlabel('Time [s]'); 
+%         ylabel('Excitation [%]');
+        hLeg = legend([marker, figH],{"Jaw max opening",muscleLabels{:,:}});
+        hTitle = get(hLeg,'Title');
+        set(hTitle,'String',groupName);
 %         vline([t0 tf],{'k','k'}, {'',strcat(windowDur," Perturbation")});
-        title(groupName);    
-        saveas(h,strcat(outputFileName,'/',groupName,'.fig'));
+%         title(groupName);    
+        % saveas(h,strcat(outputFileName,'/',groupName,'.fig'));
     end
 end
 
