@@ -44,9 +44,9 @@ t0PertWindow = 0; %s
 tfPertWindow = 0.5; %s
 %-----------------------------BASELINE MODEL-------------------------------
 [preopExcit,preOpICP,preOpICV] = ...
-    inverseSim(simTime,invModelName);
+    inversesim(simTime,invModelName);
 
-window = createLocalPertWindow(preopExcit,t0PertWindow,tfPertWindow,fs);
+window = createlocalpertwindow(preopExcit,t0PertWindow,tfPertWindow,fs);
 
 preOpsmoothExcitations = zeros(size(preopExcit));
 preOpsmoothExcitations(:,1) = preopExcit(:,1);
@@ -57,7 +57,7 @@ end
 
 %-----------------------------COMP MODEL----------------------------------
 [postopExcit,postOpICP,postOpICV] = ...
-    inverseSim(simTime,invModelName,deactivatedmuscles);
+    inversesim(simTime,invModelName,deactivatedmuscles);
 
 postOpsmoothExcitations = zeros(size(postopExcit));
 postOpsmoothExcitations(:,1) = postopExcit(:,1);

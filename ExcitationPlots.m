@@ -22,18 +22,18 @@ mylohyoid  = muscles([19:22]);
 geniohyoid = muscles([23:24]);
 
 % Muscle Groups to be deactivated
-leftsidecorprocess = muscles(:,[3 5]);
-rightsidecorprocess = muscles(:,[4 6]);
-bothcorprocess = muscles(:,[3 4 5 6]);
-leftpterygoids = muscles(:,[11 13 15]);
-righttpterygoids = muscles(:,[12 14 16]);
-allpterygoids = muscles(:,[11 12 13 14 15 16]);
-leftsubmentalmuscles = muscles(:,[17 19 21 23]);
-rightsubmentalmuscles = muscles(:,[18 20 22 24]);
-submentalmuscles = muscles(:,[17 18 19 20 21 22 23 24]);
+leftsidecorprocess = muscles([3 5]);
+rightsidecorprocess = muscles([4 6]);
+bothcorprocess = muscles([3 4 5 6]);
+leftpterygoids = muscles([11 13 15]);
+righttpterygoids = muscles([12 14 16]);
+allpterygoids = muscles([11 12 13 14 15 16]);
+leftsubmentalmuscles = muscles([17 19 21 23]);
+rightsubmentalmuscles = muscles([18 20 22 24]);
+submentalmuscles = muscles([17 18 19 20 21 22 23 24]);
 
-musclesDeactivated = pterygoids;
-muscleDeactivatedDescription = 'Pterygoids Removed';
+musclesDeactivated = leftpterygoids;
+muscleDeactivatedDescription = 'Left Pterygoids Removed';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...
@@ -57,11 +57,12 @@ postopSmoothExcit = smoothexcitationsignal(postopInvExcitations(:,2:25));
 	forwardsim(simDur,forwardModelName,postopSmoothExcit,muscles);
 
 %---------------------------EXCITATION PLOTS--------------------------------
+for iplot= 1:2
 %parameters for figure and panel size
 plotheight=20;
 plotwidth=16;
 subplotsx=2;
-subplotsy=6;   
+subplotsy=3;   
 leftedge=1.2;
 rightedge=0.4;   
 topedge=1;
@@ -84,43 +85,46 @@ for i=1:subplotsx
     for ii=1:subplotsy
 
     ax=axes('position',sub_pos{i,ii},'XGrid','off','XMinorGrid','off','FontSize',fontsize,'Box','on','Layer','top');
-
-    if(i == 1 && ii == 1)
-        plotexcitations(t,preopExcit,temporals,preopICP, outputFileName,'Preop Temporals Excitations');
-    end
-    if(i == 2 && ii == 1)
-        plotexcitations(t,postopExcit,temporals,postopICP,outputFileName,'Postop Temporals Excitations');
-    end
-    if(i == 1 && ii == 2)
-        plotexcitations(t,preopExcit,masseters,preopICP, outputFileName,'Preop Masseters Excitations');
-    end
-    if(i == 2 && ii == 2)
-        plotexcitations(t,postopExcit,masseters,postopICP,outputFileName,'Postop Masseters Excitations');
-    end
+    if(iplot == 1)    
         if(i == 1 && ii == 3)
-        plotexcitations(t,preopExcit,pterygoids,preopICP, outputFileName,'Preop Pterygoids Excitations');
+            plotexcitations(t,preopExcit,temporals,preopICP, outputFileName,'Preop Temporals Excitations');
+        end     
+        if(i == 2 && ii == 3)
+            plotexcitations(t,postopExcit,temporals,postopICP,outputFileName,'Postop Temporals Excitations');
+        end
+        if(i == 1 && ii == 2)
+            plotexcitations(t,preopExcit,masseters,preopICP, outputFileName,'Preop Masseters Excitations');
+        end
+        if(i == 2 && ii == 2)
+            plotexcitations(t,postopExcit,masseters,postopICP,outputFileName,'Postop Masseters Excitations');
+        end
+        if(i == 1 && ii == 1)
+            plotexcitations(t,preopExcit,pterygoids,preopICP, outputFileName,'Preop Pterygoids Excitations');
+        end
+        if(i == 2 && ii == 1)
+            plotexcitations(t,postopExcit,pterygoids,postopICP,outputFileName,'Postop Pterygoids Excitations');
+        end
     end
-    if(i == 2 && ii == 3)
-        plotexcitations(t,postopExcit,pterygoids,postopICP,outputFileName,'Postop Pterygoids Excitations');
+    if(iplot == 2)
+        if(i == 1 && ii == 3)
+            plotexcitations(t,preopExcit,digastrics,preopICP, outputFileName,'Preop Digastrics Excitations');
+        end
+        if(i == 2 && ii == 3)
+            plotexcitations(t,postopExcit,digastrics,postopICP,outputFileName,'Postop Digastrics Excitations');
+        end
+        if(i == 1 && ii == 2)
+            plotexcitations(t,preopExcit,mylohyoid,preopICP, outputFileName,'Preop Mylohyoid Excitations');
+        end
+        if(i == 2 && ii == 2)
+            plotexcitations(t,postopExcit,mylohyoid,postopICP,outputFileName,'Postop Mylohyoid Excitations');
+        end
+        if(i == 1 && ii == 1)
+            plotexcitations(t,preopExcit,geniohyoid,preopICP, outputFileName,'Preop Geniohyoid Excitations');
+        end
+        if(i == 2 && ii == 1)
+            plotexcitations(t,postopExcit,geniohyoid,postopICP,outputFileName,'Postop Geniohyoid Excitations');
+        end
     end
-    if(i == 1 && ii == 4)
-        plotexcitations(t,preopExcit,digastrics,preopICP, outputFileName,'Preop Digastrics Excitations');
-    end
-    if(i == 2 && ii == 4)
-        plotexcitations(t,postopExcit,digastrics,postopICP,outputFileName,'Postop Digastrics Excitations');
-    end
-    if(i == 1 && ii == 5)
-        plotexcitations(t,preopExcit,mylohyoid,preopICP, outputFileName,'Preop Mylohyoid Excitations');
-    end
-    if(i == 2 && ii == 5)
-        plotexcitations(t,postopExcit,mylohyoid,postopICP,outputFileName,'Postop Mylohyoid Excitations');
-    end
-    if(i == 1 && ii == 6)
-        plotexcitations(t,preopExcit,geniohyoid,preopICP, outputFileName,'Preop Geniohyoid Excitations');
-    end
-    if(i == 2 && ii == 6)
-        plotexcitations(t,postopExcit,geniohyoid,postopICP,outputFileName,'Postop Geniohyoid Excitations');
-end
 
     if ii==subplotsy
         if (i == 1)
@@ -148,7 +152,7 @@ end
 
     end
 end
-
+end
 %Saving eps with matlab and then producing pdf and png with system commands
 %If using windows or mac you need to download the MikTex commandline tool.
 %https://miktex.org/download

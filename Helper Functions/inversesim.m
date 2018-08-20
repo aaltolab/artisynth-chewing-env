@@ -13,7 +13,7 @@ function [collectedExcitions,collectedIncisorPath,...
 		muscleIds = {musclesDeactivated.id};
         muscleLabels = {musclesDeactivated.name};
 
-		for m = 1:length(muscleIds)
+		for m = 1:length(musclesDeactivated)
 			ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);
 		end
 	end

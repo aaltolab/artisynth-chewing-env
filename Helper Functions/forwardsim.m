@@ -33,8 +33,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     dt = round(simDur/size(smoothExcitations,1),1,'significant');
     t = [0:dt:simDur]';
 
-    ah = artisynth('-noGui','-model',forwardModelName);
-
+    ah = artisynth('-model',forwardModelName);
 
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;
@@ -43,10 +42,10 @@ function [forwICP, forwICV,forwExcitations] = ...
     end
 
     if exist('musclesToDeactivate','var')
-		muscleIds = {muscles.id};
-        muscleLabels = {muscles.name};
+		muscleIds = {musclesToDeactivate.id};
+        muscleLabels = {musclesToDeactivate.name};
         
-        for m = 1:length(muscleIds)
+        for m = 1:length(musclesToDeactivate)
             ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);
         end
     end
