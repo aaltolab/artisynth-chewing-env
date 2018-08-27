@@ -33,7 +33,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     dt = round(simDur/size(smoothExcitations,1),1,'significant');
     t = [0:dt:simDur]';
 
-    ah = artisynth('-noGui','-model',forwardModelName);
+    ah = artisynth('-model',forwardModelName);
 
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;
@@ -42,11 +42,14 @@ function [forwICP, forwICV,forwExcitations] = ...
     end
 
     if exist('musclesToDeactivate','var')
-		muscleIds = {musclesToDeactivate.id};
-        muscleLabels = {musclesToDeactivate.name};
-        
+		muscleIds = musclesToDeactivate.id;
+        muscleNames = {musclesToDeactivate.name};
+        muscleLabels = musclesToDeactivate.probeLabel;
+               
         for m = 1:length(musclesToDeactivate)
-            ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);
+            ah.find(strcat('models/jawmodel/axialSprings/',muscleNames(m))).setEnabled(false);
+%             muscleOffVector = zeros(length(smoothExcitations(:,muscleIds(m))),1);
+%             ah.setIprobeData (muscleLabels(m), horzcat(t,zeros(length(t),1)));
         end
     end
     
@@ -57,6 +60,15 @@ function [forwICP, forwICV,forwExcitations] = ...
     forwICP = ah.getOprobeData('incisor_position');
     forwICV = ah.getOprobeData('incisor_velocity');
     tempExcitations = ah.getOprobeData('excitations');
+    
     forwExcitations = tempExcitations(:,2:25);
+    if exist('musclesToDeactivate','var')
+		muscleIds = [musclesToDeactivate.id];
+               
+        for mm = 1:length(musclesToDeactivate)
+            forwExcitations(:,muscleIds(mm)) = zeros(length(t),1);
+        end
+    end
+        
     ah.quit();
 end
