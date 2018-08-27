@@ -57,7 +57,7 @@ postopSmoothExcit = smoothexcitationsignal(postopInvExcitations(:,2:25));
 	forwardsim(simDur,forwardModelName,postopSmoothExcit,muscles);
 
 %---------------------------EXCITATION PLOTS--------------------------------
-for iplot= 1:2
+for iplot= 1:3
 %parameters for figure and panel size
 plotheight=20;
 plotwidth=16;
@@ -126,12 +126,37 @@ for i=1:subplotsx
         end
     end
 
+    if(iplot == 3)
+        if(i == 1 && ii == 3)
+            plotexcitations(t,preopInvExcitations(:,2:25),temporals,preopICP, outputFileName,'Inverse Temporals Excitations');
+        end
+        if(i == 2 && ii == 3)
+            plotexcitations(t,preopInvExcitations(:,2:25),masseters,postopICP,outputFileName,'Inverse Masseters Excitations');
+        end
+        if(i == 1 && ii == 2)
+            plotexcitations(t,preopInvExcitations(:,2:25),pterygoids,preopICP, outputFileName,'Inverse Pterygoids Excitations');
+        end
+        if(i == 2 && ii == 2)
+            plotexcitations(t,preopInvExcitations(:,2:25),digastrics,postopICP,outputFileName,'Inverse Digastrics Excitations');
+        end
+        if(i == 1 && ii == 1)
+            plotexcitations(t,preopInvExcitations(:,2:25),mylohyoid,preopICP, outputFileName,'Inverse Mylohyoid Excitations');
+        end
+        if(i == 2 && ii == 1)
+            plotexcitations(t,preopInvExcitations(:,2:25),geniohyoid,postopICP,outputFileName,'Inverse Geniohyoid Excitations');
+        end
+    end
+
     if ii==subplotsy
-        if (i == 1)
-            title('Pre Op Muscle Excitations');
-        elseif (i == 2)
-            title(['Post Op Muscle Excitations','(',muscleDeactivatedDescription,')']);
-end
+        if (iplot ~= 3)
+            if (i == 1)
+                title('Pre Op Muscle Excitations');
+            elseif (i == 2)
+                title(['Post Op Muscle Excitations','(',muscleDeactivatedDescription,')']);
+            end
+        else
+            title('Raw Inverse Excitations');
+        end
 end
 
     if ii>1

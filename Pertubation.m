@@ -20,8 +20,19 @@ close all;
 rng('shuffle');
 
 %-------------------------MUSCLE DEFINITIONS------------------------------
-muscles = createmusclestruct('musclekey.txt');     
-deactivateMuscles = muscles([15 16]);
+muscles = createmusclestruct('musclekey.txt'); 
+% Muscle Groups to be deactivated
+leftsidecorprocess = muscles([3 5]);
+rightsidecorprocess = muscles([4 6]);
+bothcorprocess = muscles([3 4 5 6]);
+leftpterygoids = muscles([11 13 15]);
+righttpterygoids = muscles([12 14 16]);
+allpterygoids = muscles([11 12 13 14 15 16]);
+leftsubmentalmuscles = muscles([17 19 21 23]);
+rightsubmentalmuscles = muscles([18 20 22 24]);
+submentalmuscles = muscles([17 18 19 20 21 22 23 24]);
+
+deactivateMuscles = leftpterygoids;
        
 %-------------------------------VARIABLES----------------------------------
 % Simulation variables

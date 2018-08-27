@@ -25,14 +25,14 @@ plot3(postopICP(maxIndexPostOp,2),postopICP(maxIndexPostOp,3),maxNumPostOp,'mx',
 hLeg = legend('Pre Op ICP', 'Pre Op  Initial ICP', 'Pre Op  Final ICP', 'Pre Op Max Opening ICP' ,'Post Op ICP', 'Post Op Initial ICP', 'Post Op Final ICP', 'Post Op Max Opening ICP'); 
 hTitle = get(hLeg,'Title');
 set(hTitle,'String',title);
-if (v(1) == 0)
-    xlabel('X axis [mm]');
-    zlabel('Z axis [mm]');
-    xlim([-0.5 2]); 
-elseif(v(1) == 90)
-    ylabel('Y axis [mm]');
-    zlabel('Z axis [mm]');
-end
+% if (v(1) == 0)
+%     xlabel('X axis [mm]');
+%     zlabel('Z axis [mm]');
+    xlim([-.5 1.75]); 
+% elseif(v(1) == 90)
+%     ylabel('Y axis [mm]');
+%     zlabel('Z axis [mm]');
+% end
 % xlabel('X axis [mm]');
 % zlabel('Z axis [mm]');
 % xlim(xLim);

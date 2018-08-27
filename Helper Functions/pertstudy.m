@@ -147,7 +147,7 @@ simulationParamTable = cell2table(cell(0,length(simulationParamTableCol)), 'Vari
 [icpFull,icvFull,excitationsFull] = ...
 	forwardsim(simDur,forwardModelName,smoothExcitations,muscles);
 	
-maxPositionError = max(abs(icpFull(:,2:4)-icpFull(:,2:4)));
+maxPositionError = max(abs(invICP(:,2:4)-icpFull(:,2:4)));
 
 %Select position and velocity only within specified pertubation window
 icp = icpFull(window(:,1),:);
@@ -159,7 +159,7 @@ averageICA = (icv(end,2:4)-icv(1,2:4))/(icv(end,1)-icv(1,1));
 save(strcat(outputFileName, '\excitations.mat'),'excitationsFull');
 
 % Perform excitation analysis in window for pre simulation plots
-perturbedExcitations = performexcitationanalysis(window,smoothExcitations,pertShape,muscles,pertModelType);
+perturbedExcitations = excitationperturbation(window,smoothExcitations,pertShape,muscles,pertModelType);
 
 % Generate pre simulation plots
 [maxNumInv maxIndexInv] = min(invICP(:,4));
@@ -206,7 +206,7 @@ if(window(1,2) == 0)
 		xlabel('X axis [mm]');
 		zlabel('Z axis [mm]');
 		title('Lower mid incisor path (Frontal View)');
-		xlim([-0.25 0.25]); 
+		xlim([-0.5 0.5]); 
 		saveas(gcf,strcat(outputFileName, '\FrontalView.png'));
 	
 	 % Transverse view on ICP
@@ -284,7 +284,7 @@ for i = 1:numSim
 	
 	% Perform small pertubation and load muscle input probes
     [perturbedExcitations,...
-        pertExcitMuscleMags] = performexcitationanalysis(window,smoothExcitations,pertShape,muscles,pertModelType);
+        pertExcitMuscleMags] = excitationperturbation(window,smoothExcitations,pertShape,muscles,pertModelType);
     
     pertMagTable = [pertMagTable;num2cell(pertExcitMuscleMags)];
 	

@@ -33,7 +33,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     dt = round(simDur/size(smoothExcitations,1),1,'significant');
     t = [0:dt:simDur]';
 
-    ah = artisynth('-model',forwardModelName);
+    ah = artisynth('-noGui','-model',forwardModelName);
 
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;

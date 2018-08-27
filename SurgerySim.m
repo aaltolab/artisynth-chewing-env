@@ -100,8 +100,6 @@ set(gcf, 'PaperSize', [plotwidth plotheight]);
 set(gcf, 'PaperPositionMode', 'manual');
 set(gcf, 'PaperPosition', [0 0 plotwidth plotheight]);
 
-%TODO: generate plots from incisor path
-%TODO: run first case
 %loop to create axes
 for i=1:subplotsx
     for ii=1:subplotsy
@@ -126,9 +124,11 @@ for i=1:subplotsx
     % Goal trajectory forward vs the compensated model forwards
     if(i == 1 && ii == 1)
         plotincisorposition(goalICP,compensatedICPForw,[0,0],'Goal Comp')
+        xlabel(['X Axis [mm]']);
     end
     if(i == 2 && ii == 1)
         plotincisorposition(goalICP,compensatedICPForw,[90,0],'Goal Comp')
+        ylabel(['Y Axis [mm]']);
     end
     if ii==subplotsy
         if (i == 1)
@@ -147,11 +147,11 @@ end
     end
 
     if i==1
-    ylabel('Position [mm]')
+    zlabel('Z Axis [mm]')
     end
 
     if ii==1
-    xlabel(['Position [mm]'])
+   
     end
 
     end
