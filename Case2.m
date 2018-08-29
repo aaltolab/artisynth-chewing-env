@@ -40,8 +40,12 @@ leftsubmentalmuscles = muscles([17 19 21 23]);
 rightsubmentalmuscles = muscles([18 20 22 24]);
 submentalmuscles = muscles([17 18 19 20 21 22 23 24]);
 
-musclesToDeactivate = leftpterygoids;
-muscleDeactivatedDescription = 'Left Pterygoids Removed';
+lefttemporals = muscles([1 3 5]);
+leftmedialpterygoid = muscles([11]);
+leftlatalpterygoid = muscles([13 15]);
+
+musclesToDeactivate = leftmedialpterygoid;
+muscleDeactivatedDescription = 'Left Temporals Removed';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...

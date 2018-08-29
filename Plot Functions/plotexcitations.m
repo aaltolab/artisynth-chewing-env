@@ -76,8 +76,9 @@ function [figH] = ...
         end
 %         xlabel('Time [s]'); 
 %         ylabel('Excitation [%]');
-        hLeg = legend([marker, figH],{"Jaw max opening",muscleLabels{:,:}});
+        hLeg = legend([marker, figH],{"Jaw max opening",muscleLabels{:,:}},'FontSize',6);
         hTitle = get(hLeg,'Title');
+        set(hLeg,'Location','best');
         set(hTitle,'String',groupName);
 %         vline([t0 tf],{'k','k'}, {'',strcat(windowDur," Perturbation")});
 %         title(groupName);    

@@ -1,3 +1,5 @@
+
+
 %-------------------------------SUMMARY------------------------------------
 % This script generates inverse and forward excitation plots for each group
 % of muscles pre and post op. The excitations signals are collected for the
@@ -39,9 +41,13 @@ allpterygoids = muscles([11 12 13 14 15 16]);
 leftsubmentalmuscles = muscles([17 19 21 23]);
 rightsubmentalmuscles = muscles([18 20 22 24]);
 submentalmuscles = muscles([17 18 19 20 21 22 23 24]);
+lefttemporals = muscles([1 3 5]);
 
-musclesToDeactivate = leftpterygoids;
-muscleDeactivatedDescription = 'Left Pterygoids Removed';
+leftmedialpterygoid = muscles([11]);
+leftlatalpterygoid = muscles([13 15]]);
+
+musclesToDeactivate = leftlatalpterygoid;
+muscleDeactivatedDescription = 'Left Temporals Removed';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...
