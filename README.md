@@ -15,6 +15,6 @@ There are two main scripts in the project.
 
 2. SugerySim.m  generates jaw depressor and elevator excitations plots and lower mid incisor trajectories for a specific surgery case. The muscles to be removed for surgery are selected from the muscles structure and its value set to the musclesToDeactivate variable. The simulation duration, time step and ArtiSynth model parameters can be adjusted here.
 
-The suplementary code is located in the Plot Functions and Helper Function directories.
+The supplementary code is located in the Plot Functions and Helper Function directories.
 
 Plotting functions are defined in your workingdir/Plot Functions. Helper functions are defined in your workingdir/Helper Functions These functions are called within the main script. Saved simulations is an empty folder that you should fill with the contents of the Output folder which collects all of the simulation data and statistical data.
