@@ -35,13 +35,12 @@ leftJawClosers = muscles([13 15 17 19 21 23]);
 rightJawClosers = muscles([14 16 18 20 22 24]);
 
 %------------------------MUSCLES TO DEACTIVATE-----------------------------
-lefttemporals = muscles([1 3 5]);
-leftmedialpterygoid = muscles([11]);
-leftlatalpterygoid = muscles([13 15]);
+lefttemporalis = muscles([1 3 5]);
+leftmasseter = muscles([7 9]);
 
 %***********CHANGE THE NEXT TWO LINES TO SIMULATE SURGERY CASE*************
-musclesToDeactivate = leftmedialpterygoid; 
-plotTitle = 'Left Medial Pterygoid Removed';
+musclesToDeactivate = lefttemporalis; 
+plotTitle = 'Left Temporalis Removed';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...

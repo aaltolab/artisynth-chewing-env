@@ -21,6 +21,7 @@ rng('shuffle');
 
 %-------------------------MUSCLE DEFINITIONS------------------------------
 muscles = createmusclestruct('musclekey.txt'); 
+
 % Muscle Groups to be deactivated
 leftsidecorprocess = muscles([3 5]);
 rightsidecorprocess = muscles([4 6]);
