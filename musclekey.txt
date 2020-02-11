@@ -16,8 +16,8 @@
 16, rip, Right Inferior Lateral Pterygoid
 17, lad, Left Anterior Digastric
 18, rad, Right Anterior Digastric
-19, lam, Left Anterior Mylohyoid
-20, ram, Right Anterior Mylohyoid
+19, lam, Left Mylohyoid
+20, ram, Right Mylohyoid
 21, lpm, Left Posterior Mylohyoid
 22, rpm, Right Posterior Mylohyoid
 23, lgh, Left Geniohyoid

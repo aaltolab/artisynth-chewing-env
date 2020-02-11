@@ -1,5 +1,5 @@
 function [forwICP, forwICV,forwExcitations] = ...
-    forwardSim(simDur,forwardModelName,smoothExcitations,muscles, musclesToDeactivate)
+    forwardSim(t,forwardModelName,smoothExcitations,muscles, musclesToDeactivate)
     %forwardSim 
     % SUMMARY: 
     % This function accepts all of the required parameters 
@@ -30,30 +30,49 @@ function [forwICP, forwICV,forwExcitations] = ...
     % SUMMARY OF SCRIPT:
     % 1. run forward sim with smooth excitation
 
-    dt = round(simDur/size(smoothExcitations,1),1,'significant');
-    t = [0:dt:simDur]';
+    dt = t(end) - t(end-1);
 
     ah = artisynth('-model',forwardModelName);
+    ah.find('.').setMaxStepSize (dt);
 
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;
         muscleId = muscles(m).id;
-        ah.setIprobeData (probeLabel, horzcat(t,smoothExcitations(:,muscleId)));
+        ah.find(strcat('inputProbes/',muscles(m).probeLabel)).setStartStopTimes(0,t(end));
+         ah.setIprobeData (probeLabel, horzcat(t',smoothExcitations(:,muscleId)));
     end
 
-    if exist('musclesToDeactivate','var')
-		muscleIds = musclesToDeactivate.id;
-        muscleNames = {musclesToDeactivate.name};
-        muscleLabels = musclesToDeactivate.probeLabel;
-               
+    if exist('musclesToDeactivate','var')               
         for m = 1:length(musclesToDeactivate)
-            ah.find(strcat('models/jawmodel/axialSprings/',muscleNames(m))).setEnabled(false);
+%             ah.find(strcat('models/jawmodel/axialSprings/',muscleNames(m))).setEnabled(false);
 %             muscleOffVector = zeros(length(smoothExcitations(:,muscleIds(m))),1);
-%             ah.setIprobeData (muscleLabels(m), horzcat(t,zeros(length(t),1)));
+%             ah.setIprobeData (muscles(m).probeLabel, horzcat(t,zeros(length(t),1)));
+%             ah.find(strcat('inputProbes/',musclesToDeactivate(m).probeLabel)).setStartStopTimes(0,t(end));
+            ah.find(strcat('inputProbes/',musclesToDeactivate(m).probeLabel)).setActive(false);
         end
     end
     
-    ah.play(simDur);
+    % Set OProbe Length and Update Interval
+    ah.find('outputProbes/Incisor Displacement').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/Incisor Displacement').setUpdateInterval(dt);
+    
+    ah.find('outputProbes/Muscle Forces').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/Muscle Forces').setUpdateInterval(dt);
+    
+    ah.find('outputProbes/Jaw Pose').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/Jaw Pose').setUpdateInterval(dt);
+    
+    ah.find('outputProbes/excitations').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/excitations').setUpdateInterval(dt);
+
+    ah.find('outputProbes/incisor_position').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/incisor_position').setUpdateInterval(dt);
+
+    ah.find('outputProbes/incisor_velocity').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/incisor_velocity').setUpdateInterval(dt);
+
+    
+    ah.play(t(end));
     ah.waitForStop();
 
     % Check incisor path deviation is less that 1mm
@@ -62,13 +81,13 @@ function [forwICP, forwICV,forwExcitations] = ...
     tempExcitations = ah.getOprobeData('excitations');
     
     forwExcitations = tempExcitations(:,2:25);
-    if exist('musclesToDeactivate','var')
-		muscleIds = [musclesToDeactivate.id];
-               
-        for mm = 1:length(musclesToDeactivate)
-            forwExcitations(:,muscleIds(mm)) = zeros(length(t),1);
-        end
-    end
+%     if exist('musclesToDeactivate','var')
+% 		muscleIds = [musclesToDeactivate.id];
+%                
+%         for mm = 1:length(musclesToDeactivate)
+%             forwExcitations(:,muscleIds(mm)) = zeros(length(t),1);
+%         end
+%     end
         
     ah.quit();
 end

@@ -1,29 +1,67 @@
-function [collectedExcitions,collectedIncisorPath,... 
-	collectedIncisorVelocity] = inversesim(simDur,invModelName,musclesDeactivated)
+function [collectedExcitations,collectedIncisorPath,...
+    collectedIncisorVelocity] = inversesim(t,invModelName,targetdatapath,musclesToDeactivate)
 %INVERSESIM Summary of this function goes here
 %   simDur  = the duration of the simulation
 %	invModelName = the java path of the class to be instantiated within artisynth
 %   musclesDeactivated = The muscles that are to be deactivated for an inverse sim
 
-	ah = artisynth('-noGui','-disableHybridSolves','-model',invModelName);
+ah = artisynth('-disableHybridSolves','-model',invModelName);
+musclestoactivate = createmusclestruct('musclekey.txt');
+muscles = musclestoactivate;
+% Get tcon
+tcon = ah.find('controllers/myTrackingController');
+model = ah.find('.');
+dt = t(end) - t(end-1);
+model.setMaxStepSize (dt);
 
-	if exist('musclesDeactivated','var')
-% 		muscleIds = cell2mat(musclesDeactivated(1,:));
-% 		muscleLabels = string(musclesDeactivated(2,:));
-		muscleIds = {musclesDeactivated.id};
-        muscleLabels = {musclesDeactivated.name};
+% Add waypoints
+for i = 1:length(t)
+    model.addWayPoint(t(i));
+end
 
-		for m = 1:length(musclesDeactivated)
-			ah.find(strcat('models/jawmodel/axialSprings/',muscleLabels(m))).setEnabled(false);
-		end
-	end
+if exist('musclesToDeactivate','var')
+    muscleIds = [musclesToDeactivate.id];
+    musclestoactivate(muscleIds) = []
+    
+    for m = 1:length(musclestoactivate)
+        muscle = ah.find(strcat('models/jawmodel/axialSprings/',musclestoactivate(m).name));
+        tcon.addExciter(muscle);
+    end
+    tcon.setProbeUpdateInterval(dt);
+    tcon.setProbeDuration(t(end));
+    tcon.createProbes(model);
+else
+    for m = 1:length(musclestoactivate)
+        muscle = ah.find(strcat('models/jawmodel/axialSprings/',musclestoactivate(m).name));
+        tcon.addExciter(muscle);
+    end
+    tcon.setProbeUpdateInterval(dt);
+    tcon.setProbeDuration(t(end));
+    tcon.createProbes(model);
+end
 
-	ah.play(simDur);
-	ah.waitForStop();
-	
-    % save excitation data to matrix
-	collectedExcitions = ah.getOprobeData('computed excitations');
-	collectedIncisorPath = ah.getOprobeData('incisor_position');
-	collectedIncisorVelocity = ah.getOprobeData('incisor_velocity');
-    ah.quit();
+% Add motion target of lower incisor to tracking controller
+motionTargetIProbe = ah.find('inputProbes/target positions');
+motionTargetIProbe.setAttachedFileName(targetdatapath);
+motionTargetIProbe.load();
+motionTargetIProbe.setActive(true);
+
+ah.play();
+
+while ah.isPlaying()
+    progress = (ah.getTime()/t(end)) * 100;
+    fprintf('Simulation complete: %5.2f %%\n ', progress)
+    
+    if ah.getTime() == t(end)
+        ah.pause()
+    end
+end
+
+% save excitation data to matrix
+collectedExcitations = zeros(length(t),length(muscles));
+excitationProbe = ah.getOprobeData('computed excitations');
+collectedExcitations(:,[musclestoactivate.id]) = excitationProbe(:,2:length(musclestoactivate)+1);
+collectedIncisorPath = ah.getOprobeData('target positions');
+collectedIncisorVelocity = ah.getOprobeData('incisor_velocity');
+ah.quit();
 end

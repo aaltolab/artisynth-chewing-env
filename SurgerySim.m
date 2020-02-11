@@ -11,9 +11,10 @@
 % are shown below in the MUSCLES TO DEACTIVATE section below.
 
 %-------------------------SCRIPT DEFINITIONS------------------------------  
-simDur  = 0.5;
-dt = 0.005;
+simDur  = 0.2;
+dt = 0.001;
 t = [0:dt:simDur];
+targetdatapath = 'C:\develop\artisynth\Patient Data\data\\lowerincisor_position.txt';
 
 %-------------------------MUSCLE DEFINITIONS------------------------------  
 muscles = createmusclestruct('musclekey.txt'); 
@@ -29,55 +30,66 @@ geniohyoid = muscles([23:24]);
 % Masseter, Medial Pterygoid, and Temporalis
 leftJawOpeners = muscles([1 3 5 7 9 11]);
 rightJawOpeners = muscles([2 4 6 8 10 12]);
+jawOpeners = muscles([1 2 3 4 5 6 7 8 9 10 11 12]);
 
 % Digastricus, Geniohyoid, Lateral pterygoid, Mylohyoid
 leftJawClosers = muscles([13 15 17 19 21 23]);
 rightJawClosers = muscles([14 16 18 20 22 24]);
+jawClosers = muscles([13 14 15 16 17 18 19 20 21 22 23 24]);
+
+% hemimandibuectomy
+leftSide =  muscles([1 3 5 7 9 11 13 15 17 19 21 23]);
+rightSide =  muscles([2 4 6 8 10 12 14 16 18 20 22 24]);
+
+% Masseter and Pterygoids
+leftMassPter = muscles([7 9 11 13 15]);
+righttMassPter = muscles([8 10 12 14 16]);
+
 
 %------------------------MUSCLES TO DEACTIVATE-----------------------------
 lefttemporalis = muscles([1 3 5]);
 leftmasseter = muscles([7 9]);
 
 %***********CHANGE THE NEXT TWO LINES TO SIMULATE SURGERY CASE*************
-musclesToDeactivate = lefttemporalis; 
-plotTitle = 'Left Temporalis Removed';
+musclesToDeactivate = righttMassPter; 
+plotTitle = 'Unilateral Masseter and Pterygoid Resection  (Right Side)';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...
-    'artisynth.models.kieran.tmjsurgery.TmjInverseOpenCloseSimulation';
+    'artisynth.models.kieran.jawsurgery.JawModelInverse';
 forwardModelName = ...
-    'artisynth.models.kieran.tmjsurgery.ForwardChewing';
+    'artisynth.models.kieran.jawsurgery.JawModelForward';
 
 outputFileName = 'Excitation Plots';
 mkdir(outputFileName);
 
 %-------------------------------PREOP------------------------------
-[preopInvExcitations,preopInvICP,preopInvICV] = inversesim(simDur,invModelName);
+[preopInvExcitations,preopInvICP,preopInvICV] = inversesim(t,invModelName,targetdatapath);
 
-preopSmoothExcit = smoothexcitationsignal(preopInvExcitations(:,2:25));
+preopSmoothExcit = smoothexcitationsignal(preopInvExcitations);
 
 [goalICP,preopICV,preopExcit] = ...
-	forwardsim(simDur,forwardModelName,preopSmoothExcit,muscles);
+	forwardsim(t,forwardModelName,preopSmoothExcit,muscles);
 
 %---------------------------------POSTOP------------------------------
 [postopICPForw,postopICV,postopExcit] = ...
-    forwardsim(simDur,forwardModelName,preopSmoothExcit,muscles,musclesToDeactivate);
+    forwardsim(t,forwardModelName,preopSmoothExcit,muscles,musclesToDeactivate);
     
 %---------------------------INVERSE COMPENSATION-----------------------
 [compensatedExcit,compensatedExcitICP,compensatedExcitICV] = ...
-    inversesim(simDur,invModelName,musclesToDeactivate);
+    inversesim(t,invModelName,targetdatapath,musclesToDeactivate);
 
-compensatedSmoothExcit = smoothexcitationsignal(compensatedExcit(:,2:25));
+compensatedSmoothExcit = smoothexcitationsignal(compensatedExcit);
 
 [compensatedICPForw,compensatedICVForw,compensatedExcitForw] = ...
-    forwardsim(simDur,forwardModelName,compensatedSmoothExcit,muscles,musclesToDeactivate);
+    forwardsim(t,forwardModelName,compensatedSmoothExcit,muscles,musclesToDeactivate);
 
 %---------------------------EXCITATION PLOTS--------------------------------
 for iplot= 1:1
     %parameters for figure and panel size
     plotheight=24.1;
     plotwidth=17.7;
-    subplotsx=3;
+    subplotsx=5;
     subplotsy=4;   
     leftedge=1.5;
     rightedge=1.5;   
@@ -98,32 +110,79 @@ for iplot= 1:1
     
     %loop to create axes
     for i=1:subplotsx
-        for ii=1:subplotsy
+        for ii=2:subplotsy
             ax=axes('position',sub_pos{i,ii},'XGrid','off','XMinorGrid','off','FontSize',6,'Box','on','Layer','top');
             if(iplot == 1)
-                % Column 1 - Jaw Depressors
-                if (i == 3 && ii == 4)
-                    plotexcitations(t,preopExcit,leftJawClosers,postopICPForw, outputFileName,'Preop Excitations');
+                % Column 5 - Right Jaw Depressors
+                if (i == 5 && ii == 4)
+                    plotexcitations(t,preopExcit,rightJawClosers,postopICPForw, outputFileName,'Preop Excitations');
                     set(ax,'xticklabel',[])
                     set(ax,'yticklabel',[])
                 end
-                if(i == 3 && ii == 3)
-                    plotexcitations(t,postopExcit,leftJawClosers,postopICPForw, outputFileName,'Postop Excitations');
+                if(i == 5 && ii == 3)
+                    plotexcitations(t,postopExcit,rightJawClosers,postopICPForw, outputFileName,'Postop Excitations');
                     set(ax,'xticklabel',[])
                     set(ax,'yticklabel',[])
                 end
-                if(i == 3 && ii == 2)
-                    plotexcitations(t,compensatedExcitForw,leftJawClosers,compensatedICPForw, outputFileName,'Ipsilateral Compensated');
-                    set(ax,'xticklabel',[])
+                if(i == 5 && ii == 2)
+                    plotexcitations(t,compensatedExcitForw,rightJawClosers,compensatedICPForw, outputFileName,'Compensated');
                     set(ax,'yticklabel',[])
+                    xlabel(['Time [s]'])
                 end
-                if(i == 3 && ii == 1)
+                if(i == 5 && ii == 1)
                     plotexcitations(t,compensatedExcitForw,rightJawClosers,compensatedICPForw, outputFileName,'Contralateral Compensated');
                     set(ax,'yticklabel',[])
                     xlabel(['Time [s]'])
                 end
                 
-                % Column 2 - Jaw Elevators
+                % Column 4 - Left Jaw Depressors
+                if (i == 4 && ii == 4)
+                    plotexcitations(t,preopExcit,leftJawClosers,postopICPForw, outputFileName,'Preop Excitations');
+                    set(ax,'xticklabel',[])
+                    set(ax,'yticklabel',[])
+                end
+                if(i == 4 && ii == 3)
+                    plotexcitations(t,postopExcit,leftJawClosers,postopICPForw, outputFileName,'Postop Excitations');
+                    set(ax,'xticklabel',[])
+                    set(ax,'yticklabel',[])
+                end
+                if(i == 4 && ii == 2)
+                    plotexcitations(t,compensatedExcitForw,leftJawClosers,compensatedICPForw, outputFileName,'Compensated');
+                    set(ax,'yticklabel',[])
+                    xlabel(['Time [s]'])
+                end
+                if(i == 4 && ii == 1)
+                    plotexcitations(t,compensatedExcitForw,leftJawClosers,compensatedICPForw, outputFileName,'Contralateral Compensated');
+                    set(ax,'yticklabel',[])
+                    xlabel(['Time [s]'])
+                end
+                
+                % Column 3 - Right Jaw Elevators
+                if(i == 3 && ii == 4)
+                    plotexcitations(t,preopExcit,rightJawOpeners,goalICP,outputFileName,'Preop Excitations');
+                    set(ax,'yticklabel',[])
+                    set(ax,'xticklabel',[])
+
+                end
+                if(i == 3 && ii == 3)
+                    plotexcitations(t,postopExcit,rightJawOpeners,postopICPForw,outputFileName,'Postop Excitations');
+                    set(ax,'yticklabel',[])
+                    set(ax,'xticklabel',[])
+
+                end
+                if(i == 3 && ii == 2)
+                    plotexcitations(t,compensatedExcitForw,rightJawOpeners,compensatedICPForw, outputFileName,'Compensated');
+                    set(ax,'yticklabel',[])
+                    xlabel(['Time [s]'])
+
+                end
+                if(i == 3 && ii == 1)
+                    plotexcitations(t,compensatedExcitForw,rightJawOpeners,compensatedICPForw, outputFileName,'Contralateral Compensated');
+                    set(ax,'yticklabel',[])
+                    xlabel(['Time [s]'])
+                end
+                
+                % Column 2 - Right Jaw Elevators
                 if(i == 2 && ii == 4)
                     plotexcitations(t,preopExcit,leftJawOpeners,goalICP,outputFileName,'Preop Excitations');
                     set(ax,'yticklabel',[])
@@ -137,18 +196,19 @@ for iplot= 1:1
 
                 end
                 if(i == 2 && ii == 2)
-                    plotexcitations(t,compensatedExcitForw,leftJawOpeners,compensatedICPForw, outputFileName,'Ipsilateral Compensated');
+                    plotexcitations(t,compensatedExcitForw,leftJawOpeners,compensatedICPForw, outputFileName,'Compensated');
                     set(ax,'yticklabel',[])
-                    set(ax,'xticklabel',[])
+                    xlabel(['Time [s]'])
+
 
                 end
                 if(i == 2 && ii == 1)
-                    plotexcitations(t,compensatedExcitForw,rightJawOpeners,compensatedICPForw, outputFileName,'Contralateral Compensated');
+                    plotexcitations(t,compensatedExcitForw,leftJawOpeners,compensatedICPForw, outputFileName,'Contralateral Compensated');
                     set(ax,'yticklabel',[])
                     xlabel(['Time [s]'])
                 end
                 
-                % Column 3 - Trajectory Plots
+                % Column 1 - Trajectory Plots
                 if(i == 1 && ii == 4)
                     plotincisorposition(goalICP,postopICPForw,compensatedICPForw,[0,0],['Fontal View']);
                     set(ax,'yticklabel',[])
@@ -169,13 +229,17 @@ for iplot= 1:1
                 if (i == 1)
                     title('Lower Mid Incisor Position');
                 elseif (i == 2)
-                    title('Jaw Elevators');
+                    title('Left Jaw Elevators');
                 elseif (i == 3)
-                    title('Jaw Depressors');
+                    title('Right Jaw Elevators');                
+                elseif (i == 4)
+                    title('Left Jaw Depressors');
+                elseif (i == 5)
+                    title('Right Jaw Depressors');
                 end
             end
         
-            if i==3
+            if i==5
                 yyaxis right
                 ylabel('Excitation [%]');
                 set(gca,'ycolor','k') 
