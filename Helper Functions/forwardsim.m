@@ -38,8 +38,9 @@ function [forwICP, forwICV,forwExcitations] = ...
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;
         muscleId = muscles(m).id;
-        ah.find(strcat('inputProbes/',muscles(m).probeLabel)).setStartStopTimes(0,t(end));
-         ah.setIprobeData (probeLabel, horzcat(t',smoothExcitations(:,muscleId)));
+        probeData = horzcat(t',smoothExcitations(:,muscleId));
+        ah.find(strcat('inputProbes/',probeLabel)).setStartStopTimes(0,t(end));
+        ah.setIprobeData (probeLabel, probeData);
     end
 
     if exist('musclesToDeactivate','var')               
@@ -56,14 +57,14 @@ function [forwICP, forwICV,forwExcitations] = ...
     ah.find('outputProbes/Incisor Displacement').setStartStopTimes(0,t(end));
     ah.find('outputProbes/Incisor Displacement').setUpdateInterval(dt);
     
-    ah.find('outputProbes/Muscle Forces').setStartStopTimes(0,t(end));
-    ah.find('outputProbes/Muscle Forces').setUpdateInterval(dt);
+%     ah.find('outputProbes/Muscle Forces').setStartStopTimes(0,t(end));
+%     ah.find('outputProbes/Muscle Forces').setUpdateInterval(dt);
     
     ah.find('outputProbes/Jaw Pose').setStartStopTimes(0,t(end));
     ah.find('outputProbes/Jaw Pose').setUpdateInterval(dt);
     
-    ah.find('outputProbes/excitations').setStartStopTimes(0,t(end));
-    ah.find('outputProbes/excitations').setUpdateInterval(dt);
+    ah.find('outputProbes/Excitations').setStartStopTimes(0,t(end));
+    ah.find('outputProbes/Excitations').setUpdateInterval(dt);
 
     ah.find('outputProbes/incisor_position').setStartStopTimes(0,t(end));
     ah.find('outputProbes/incisor_position').setUpdateInterval(dt);
@@ -78,7 +79,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     % Check incisor path deviation is less that 1mm
     forwICP = ah.getOprobeData('incisor_position');
     forwICV = ah.getOprobeData('incisor_velocity');
-    tempExcitations = ah.getOprobeData('excitations');
+    tempExcitations = ah.getOprobeData('Excitations');
     
     forwExcitations = tempExcitations(:,2:25);
 %     if exist('musclesToDeactivate','var')

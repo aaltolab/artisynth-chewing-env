@@ -58,9 +58,8 @@ while ah.isPlaying()
 end
 
 % save excitation data to matrix
-collectedExcitations = zeros(length(t),length(muscles));
-excitationProbe = ah.getOprobeData('computed excitations');
-collectedExcitations(:,[musclestoactivate.id]) = excitationProbe(:,2:length(musclestoactivate)+1);
+tempExcitations = ah.getOprobeData('computed excitations');
+collectedExcitations = tempExcitations(:,2:25);
 collectedIncisorPath = ah.getOprobeData('target positions');
 collectedIncisorVelocity = ah.getOprobeData('incisor_velocity');
 ah.quit();

@@ -11,10 +11,10 @@
 % are shown below in the MUSCLES TO DEACTIVATE section below.
 
 %-------------------------SCRIPT DEFINITIONS------------------------------  
-simDur  = 0.2;
+simDur  = 0.75;
 dt = 0.001;
 t = [0:dt:simDur];
-targetdatapath = 'C:\develop\artisynth\Patient Data\data\\lowerincisor_position.txt';
+targetdatapath = 'C:\develop\artisynth\Patient Data\lowerincisor_position_des2.txt'
 
 %-------------------------MUSCLE DEFINITIONS------------------------------  
 muscles = createmusclestruct('musclekey.txt'); 
@@ -73,16 +73,16 @@ preopSmoothExcit = smoothexcitationsignal(preopInvExcitations);
 
 %---------------------------------POSTOP------------------------------
 [postopICPForw,postopICV,postopExcit] = ...
-    forwardsim(t,forwardModelName,preopSmoothExcit,muscles,musclesToDeactivate);
+    forwardsim(t,forwardModelName,preopSmoothExcit,muscles);
     
 %---------------------------INVERSE COMPENSATION-----------------------
 [compensatedExcit,compensatedExcitICP,compensatedExcitICV] = ...
-    inversesim(t,invModelName,targetdatapath,musclesToDeactivate);
+    inversesim(t,invModelName,targetdatapath);
 
 compensatedSmoothExcit = smoothexcitationsignal(compensatedExcit);
 
 [compensatedICPForw,compensatedICVForw,compensatedExcitForw] = ...
-    forwardsim(t,forwardModelName,compensatedSmoothExcit,muscles,musclesToDeactivate);
+    forwardsim(t,forwardModelName,compensatedSmoothExcit,muscles);
 
 %---------------------------EXCITATION PLOTS--------------------------------
 for iplot= 1:1
