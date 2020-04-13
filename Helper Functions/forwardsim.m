@@ -1,5 +1,5 @@
 function [forwICP, forwICV,forwExcitations] = ...
-    forwardSim(t,forwardModelName,smoothExcitations,muscles, musclesToDeactivate)
+    forwardSim(t,forwardModelName,excitations, musclesToDeactivate,debug)
     %forwardSim 
     % SUMMARY: 
     % This function accepts all of the required parameters 
@@ -10,7 +10,7 @@ function [forwICP, forwICV,forwExcitations] = ...
     % forward simulation.
     %
     % PARAMETERS:
-    % 	smoothExcitations   = This parameter is a matrix that holds the 
+    % 	excitations   = This parameter is a matrix that holds the 
     %					    	calculated and signal smoothed excitations
     %					    	from the inverse simulation in artisynth
     %	muscles		        = A struct of simulation muscles. The keys 
@@ -31,27 +31,30 @@ function [forwICP, forwICV,forwExcitations] = ...
     % 1. run forward sim with smooth excitation
 
     dt = t(end) - t(end-1);
-
+    muscles = createmusclestruct('musclekey.csv');
+    
     ah = artisynth('-model',forwardModelName);
     ah.find('.').setMaxStepSize (dt);
 
     for m = 1:length(muscles)
         probeLabel = muscles(m).probeLabel;
         muscleId = muscles(m).id;
-        probeData = horzcat(t',smoothExcitations(:,muscleId));
+        probeData = horzcat(t',excitations(:,muscleId));
         ah.find(strcat('inputProbes/',probeLabel)).setStartStopTimes(0,t(end));
         ah.setIprobeData (probeLabel, probeData);
     end
 
-    if exist('musclesToDeactivate','var')               
+    if length(musclesToDeactivate) ~= 0               
         for m = 1:length(musclesToDeactivate)
 %             ah.find(strcat('models/jawmodel/axialSprings/',muscleNames(m))).setEnabled(false);
-%             muscleOffVector = zeros(length(smoothExcitations(:,muscleIds(m))),1);
+%             muscleOffVector = zeros(length(excitations(:,muscleIds(m))),1);
 %             ah.setIprobeData (muscles(m).probeLabel, horzcat(t,zeros(length(t),1)));
 %             ah.find(strcat('inputProbes/',musclesToDeactivate(m).probeLabel)).setStartStopTimes(0,t(end));
             ah.find(strcat('inputProbes/',musclesToDeactivate(m).probeLabel)).setActive(false);
         end
     end
+    
+    pause(1);
     
     % Set OProbe Length and Update Interval
     ah.find('outputProbes/Incisor Displacement').setStartStopTimes(0,t(end));
@@ -72,6 +75,15 @@ function [forwICP, forwICV,forwExcitations] = ...
     ah.find('outputProbes/incisor_velocity').setStartStopTimes(0,t(end));
     ah.find('outputProbes/incisor_velocity').setUpdateInterval(dt);
 
+    if debug == 1
+        pause(1);
+        disp("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        disp("!!!!!!                                    !!!!!!!");
+        disp("!!!!!!     Enter any key to continue      !!!!!!!");
+        disp("!!!!!!                                    !!!!!!!");
+        disp("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        pause;
+    end
     
     ah.play(t(end));
     ah.waitForStop();

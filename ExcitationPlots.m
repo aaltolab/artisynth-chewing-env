@@ -11,7 +11,7 @@ dt = 0.005;
 t = [0:dt:simDur];
 
 %-------------------------MUSCLE DEFINITIONS------------------------------  
-muscles = createmusclestruct('musclekey.txt'); 
+muscles = createmusclestruct('musclekey.csv'); 
  
 % Muscle Groups
 temporals  = muscles([1:6]);

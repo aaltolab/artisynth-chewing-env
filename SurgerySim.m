@@ -14,10 +14,10 @@
 simDur  = 0.75;
 dt = 0.001;
 t = [0:dt:simDur];
-targetdatapath = 'C:\develop\artisynth\Patient Data\lowerincisor_position_des2.txt'
-
+targetdatapath = 'C:\develop\artisynth\Patient Data\lowerincisor_position_des0.txt'
+debug = 0;
 %-------------------------MUSCLE DEFINITIONS------------------------------  
-muscles = createmusclestruct('musclekey.txt'); 
+muscles = createmusclestruct('Muscle Info\musclekey.csv'); 
  
 % Muscle Groups
 temporals  = muscles([1:6]);
@@ -28,61 +28,59 @@ mylohyoid  = muscles([19:22]);
 geniohyoid = muscles([23:24]);
 
 % Masseter, Medial Pterygoid, and Temporalis
-leftJawOpeners = muscles([1 3 5 7 9 11]);
-rightJawOpeners = muscles([2 4 6 8 10 12]);
+righttJawOpeners = muscles([1 3 5 7 9 11]);
+lefttJawOpeners = muscles([2 4 6 8 10 12]);
 jawOpeners = muscles([1 2 3 4 5 6 7 8 9 10 11 12]);
 
 % Digastricus, Geniohyoid, Lateral pterygoid, Mylohyoid
-leftJawClosers = muscles([13 15 17 19 21 23]);
-rightJawClosers = muscles([14 16 18 20 22 24]);
+rightJawClosers = muscles([13 15 17 19 21 23]);
+leftJawClosers = muscles([14 16 18 20 22 24]);
 jawClosers = muscles([13 14 15 16 17 18 19 20 21 22 23 24]);
 
 % hemimandibuectomy
-leftSide =  muscles([1 3 5 7 9 11 13 15 17 19 21 23]);
-rightSide =  muscles([2 4 6 8 10 12 14 16 18 20 22 24]);
+rightSide =  muscles([1 3 5 7 9 11 13 15 17 19 21 23]);
+leftSide =  muscles([2 4 6 8 10 12 14 16 18 20 22 24]);
 
 % Masseter and Pterygoids
-leftMassPter = muscles([7 9 11 13 15]);
-righttMassPter = muscles([8 10 12 14 16]);
-
-
+rightMassPter = muscles([7 9 11 13 15]);
+leftmasseterandpter = muscles([8 10 12 14 16]);
 %------------------------MUSCLES TO DEACTIVATE-----------------------------
-lefttemporalis = muscles([1 3 5]);
-leftmasseter = muscles([7 9]);
+
 
 %***********CHANGE THE NEXT TWO LINES TO SIMULATE SURGERY CASE*************
-musclesToDeactivate = righttMassPter; 
-plotTitle = 'Unilateral Masseter and Pterygoid Resection  (Right Side)';
+musclesToDeactivate = leftmasseterandpter; 
+plotTitle = 'Unilateral Masseter and Pterygoid Resection (Left Side)';
 
 %-------------------------ARTISYNTH MODEL NAMES---------------------------
 invModelName = ...
-    'artisynth.models.kieran.jawsurgery.JawModelInverse';
+    'artisynth.models.irsm.jawsurgery.JawModelInverse';
 forwardModelName = ...
-    'artisynth.models.kieran.jawsurgery.JawModelForward';
+    'artisynth.models.irsm.jawsurgery.JawModelForward';
 
 outputFileName = 'Excitation Plots';
 mkdir(outputFileName);
 
 %-------------------------------PREOP------------------------------
-[preopInvExcitations,preopInvICP,preopInvICV] = inversesim(t,invModelName,targetdatapath);
+[preopInvExcitations,preopInvICP,preopInvICV] = ...
+    inversesim(t,invModelName,targetdatapath,muscles([]),debug);
 
-preopSmoothExcit = smoothexcitationsignal(preopInvExcitations);
+% preopSmoothExcit = smoothexcitationsignal(preopInvExcitations);
 
 [goalICP,preopICV,preopExcit] = ...
-	forwardsim(t,forwardModelName,preopSmoothExcit,muscles);
+	forwardsim(t,forwardModelName,preopInvExcitations,muscles([]),debug);
 
 %---------------------------------POSTOP------------------------------
 [postopICPForw,postopICV,postopExcit] = ...
-    forwardsim(t,forwardModelName,preopSmoothExcit,muscles);
+    forwardsim(t,forwardModelName,preopInvExcitations,musclesToDeactivate,debug);
     
 %---------------------------INVERSE COMPENSATION-----------------------
 [compensatedExcit,compensatedExcitICP,compensatedExcitICV] = ...
-    inversesim(t,invModelName,targetdatapath);
+    inversesim(t,invModelName,targetdatapath,musclesToDeactivate,debug);
 
-compensatedSmoothExcit = smoothexcitationsignal(compensatedExcit);
+% compensatedSmoothExcit = smoothexcitationsignal(compensatedExcit);
 
 [compensatedICPForw,compensatedICVForw,compensatedExcitForw] = ...
-    forwardsim(t,forwardModelName,compensatedSmoothExcit,muscles);
+    forwardsim(t,forwardModelName,compensatedExcit,musclesToDeactivate,debug);
 
 %---------------------------EXCITATION PLOTS--------------------------------
 for iplot= 1:1
