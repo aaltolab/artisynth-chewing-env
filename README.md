@@ -54,7 +54,7 @@ PATH %ARTISYNTH_HOME%\bin;%PATH%
 OMP_NUM_THREADS 2
 ```
 
-## Installing Artisnynth:
+## Installing Artisynth:
 1. Clone [artisynth_core](https://github.com/artisynth/artisynth_core.git) and its class extension project [artisynth_models](https://github.com/artisynth/artisynth_models.git). There is a 3rd project (artisynth_projects) that can only be accessed by getting user permission from the developers. You can find their contact information here [Artisynth home page](https://www.artisynth.org/Main/HomePage).
 
 2. Download libraries
