@@ -3,7 +3,7 @@
 This is a quick setup. The full guide for installing artisynth can be found [here](https://www.artisynth.org/manuals/index.jsp?nav=%2F0).
 
 ## System Requirements:
-1. 64 but Windows, MacOS, or Linux.
+1. 64 bit Windows, MacOS, or Linux.
 2. Java Development Kit (JDK) 8 installed [Java JDK 8](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html).
 3. To verify Java is installed run `javac -version` returns the version you downloaded.
 
