@@ -14,7 +14,7 @@
 simDur  = 0.75;
 dt = 0.001;
 t = [0:dt:simDur];
-debug = 1; % stops sim before run in artisnyth to view.
+debug = 0; % stops sim before run in artisnyth to view.
 %-------------------------MUSCLE DEFINITIONS------------------------------  
 muscles = createmusclestruct('Muscle Info\musclekey.csv'); 
 
@@ -55,10 +55,10 @@ forwardModelName = ...
 [frwICP,frwICV,frwExcit] = ...
 	forwardsim(t,forwardModelName,invExcitations,musclesToDeactivate,debug);
 
-csvwrite(strcat(fullpath,'\invSmoothExcit_',operation,'_Designer_',designer,'.csv'),invExcit);
-csvwrite(strcat(fullpath,'\invICP_',operation,'_Designer_',designer,'.csv'),invICP);
-csvwrite(strcat(fullpath,'\frwExcitations_',operation,'_Designer_',designer,'.csv'),frwExcit);
-csvwrite(strcat(fullpath,'\frwICP_',operation,'_Designer_',designer,'.csv'),frwICP);
+% csvwrite(strcat(fullpath,'\invSmoothExcit_',operation,'_Designer_',designer,'.csv'),invExcit);
+% csvwrite(strcat(fullpath,'\invICP_',operation,'_Designer_',designer,'.csv'),invICP);
+% csvwrite(strcat(fullpath,'\frwExcitations_',operation,'_Designer_',designer,'.csv'),frwExcit);
+% csvwrite(strcat(fullpath,'\frwICP_',operation,'_Designer_',designer,'.csv'),frwICP);
 
 %---------------------------EXCITATION PLOTS--------------------------------
 for iplot= 1:1
