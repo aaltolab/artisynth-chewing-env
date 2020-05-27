@@ -4,7 +4,7 @@
 % ass artisynths root folder on your local machine and adds the dependencies to
 % run the artisynth matlab plug in on your machine.
 
-workingdir = 'C:\develop\matlab\chewing-pertubation';
+workingdir = 'C:\develop\matlab\artisynth-chewing-env';
 artisynthhome = 'C:\develop\artisynth';
 addpath(strcat(workingdir,'\Plot Functions'));
 addpath(strcat(workingdir,'\Helper Functions'));

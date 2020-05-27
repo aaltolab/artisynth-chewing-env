@@ -37,7 +37,7 @@ if length(musclesToDeactivate) ~= 0
     op = ah.find('outputProbes/computed excitations');
     for i = 1:length(musclestoactivate)
         label = string(op.getPlotTraceInfo(i-1).getLabel());
-        trimmedLabel = extractBetween(label,19,21);
+        trimmedLabel = extractBetween(label,14,16);
         OprobeHeaders(i) =  trimmedLabel;
     end
     
@@ -55,7 +55,7 @@ else
     op = ah.find('outputProbes/computed excitations');
     for i = 1:length(musclestoactivate)
         label = string(op.getPlotTraceInfo(i-1).getLabel());
-        trimmedLabel = extractBetween(label,19,21);
+        trimmedLabel = extractBetween(label,14,16);
         OprobeHeaders(i) =  trimmedLabel;
     end
     % TODO: Build a function to set maxForce, passiveFraction, optLength,
@@ -113,7 +113,7 @@ collectedExcitations = zeros(length(t),24);
             collectedExcitations(:,colNum) = recoveredExcitations{2}(:,m);
         end
     end
-collectedIncisorPath = ah.getOprobeData('target positions');
+collectedIncisorPath = ah.getOprobeData('tracked positions');
 collectedIncisorVelocity = ah.getOprobeData('incisor_velocity');
 ah.quit();
 end
